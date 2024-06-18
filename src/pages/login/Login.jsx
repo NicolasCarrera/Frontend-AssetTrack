@@ -8,10 +8,10 @@ export default function Login() {
 
   const handleLogin = async (event) => {
     event.preventDefault()
-    const username = event.target.elements.username.value
+    const identification = event.target.elements.identification.value
     const password = event.target.elements.password.value
 
-    const logged = await loginUser({ username, password })
+    const logged = await loginUser(identification, password)
 
     if (!logged) {
       setErrorMessage('El usuario o la contraseña son incorrectos')
@@ -32,12 +32,12 @@ export default function Login() {
         <h1 className='mb-12 text-center text-5xl font-extrabold tracking-tight'>Asset Track</h1>
         <label className='block'>
           <span className='block mb-2 text-sm font-medium'>
-            Nombre
+            Numero de identificación
           </span>
           <input
-            className='block w-full px-3 py-2 rounded-md text-[#0F0E17]'
-            type="text"
-            name='username'
+            className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
+            type='text'
+            name='identification'
             required
           />
         </label>
@@ -46,15 +46,15 @@ export default function Login() {
             Contraseña
           </span>
           <input
-            className='block w-full px-3 py-2 rounded-md text-[#0F0E17]'
-            type="password"
+            className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
+            type='password'
             name='password'
             required />
         </label>
 
         <button
-          className='block w-full px-3 py-2 rounded-md bg-[#FF8906]'
-          type="submit">
+          className='block w-full px-4 py-2 rounded-md bg-[#FF8906]'
+          type='submit'>
           Iniciar sesión
         </button>
       </form>
