@@ -4,6 +4,7 @@ import Home from '../../assets/icons/Home'
 import Users from '../../assets/icons/Users'
 import Office from '../../assets/icons/Office'
 import './styles.css'
+import ToolTip from './ToolTip'
 
 export default function StickyNavbar() {
   return (
@@ -14,17 +15,23 @@ export default function StickyNavbar() {
       <ul className='my-5 flex flex-col gap-4 list-none'>
         <li>
           <NavLink to='/welcome' activeClassName='active'>
-            <Home />
+            <ToolTip tooltip='Inicio'>
+              <Home />
+            </ToolTip>
           </NavLink>
         </li>
         <li>
           <NavLink to='/users' activeClassName='active'>
-            <Users />
+            <ToolTip tooltip='Gestión de usuarios'>
+              <Users />
+            </ToolTip>
           </NavLink>
         </li>
         <li>
           <NavLink to='/customers' activeClassName='active'>
-            <Office />
+            <ToolTip tooltip='Gestión de clientes'>
+              <Office />
+            </ToolTip>
           </NavLink>
         </li>
       </ul>

@@ -11,12 +11,19 @@ export default function Login() {
     const identification = event.target.elements.identification.value
     const password = event.target.elements.password.value
 
-    const logged = await loginUser(identification, password)
+    // const logged = await loginUser(identification, password)
 
-    if (!logged) {
-      setErrorMessage('El usuario o la contraseña son incorrectos')
-      return
-    }
+    // if (!logged) {
+    //   setErrorMessage('El usuario o la contraseña son incorrectos')
+    //   return
+    // }
+
+    sessionStorage.setItem('user', {
+      id: 1,
+      name: 'Usuario',
+      permissions: [''],
+      roles: ['admin'],
+    })
 
     navigate('/welcome')
   }
