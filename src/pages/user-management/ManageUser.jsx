@@ -128,7 +128,10 @@ export default function ManageUser() {
               >
                 {
                   colums.map(column => (
-                    <td key={column.value}>
+                    <td
+                      key={column.value}
+                      className='py-2'
+                    >
                       {
                         item[column.value]
                       }
