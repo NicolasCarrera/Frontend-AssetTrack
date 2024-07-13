@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import ProtectedRoute from './ProtectedRoute'
 import ManageCustomer from '../pages/customer-management/ManageCustomer'
 import ManageAsset from '../pages/asset-management/ManageAsset'
+import ManageMaintenance from '../pages/maintenance-management/ManageMaintenance'
 
 export default function AppRoutes() {
   const [user, setUser] = useState(null)
@@ -25,6 +26,7 @@ export default function AppRoutes() {
         <Route path='/users' element={<ManageUser />} />
         <Route path='/customers' element={<ManageCustomer />} />
         <Route path='/customers/:customerId/branch/:branchId/assets' element={<ManageAsset />} />
+        <Route path='/customer/:customerId/branch/:branchId/asset/:assetId' element={<ManageMaintenance />} />
       </Route>
     </Routes>
   )
