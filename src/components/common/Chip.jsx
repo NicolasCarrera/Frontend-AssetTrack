@@ -5,7 +5,7 @@ export default function Chip({ variant, children }) {
       chipClass = 'bg-[#CCFFCC] text-[#00AA00]'
       break
     case 'yellow':
-      chipClass = 'bg-[#FFFFD0] text-[#F5B100]'
+      chipClass = 'bg-[#F2EC9B] text-[#6E6122]'
       break
     case 'red':
       chipClass = 'bg-[#FFBBBB] text-[#FF0000]'
