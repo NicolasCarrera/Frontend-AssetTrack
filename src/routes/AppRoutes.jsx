@@ -8,6 +8,7 @@ import ProtectedRoute from './ProtectedRoute'
 import ManageCustomer from '../pages/customer-management/ManageCustomer'
 import ManageAsset from '../pages/asset-management/ManageAsset'
 import ManageMaintenance from '../pages/maintenance-management/ManageMaintenance'
+import ManageWorkOrder from '../pages/work-order-management/ManageWorkOrder'
 
 export default function AppRoutes() {
   const [user, setUser] = useState(null)
@@ -23,10 +24,14 @@ export default function AppRoutes() {
       <Route path='/' element={<Home />}>
         <Route index element={<ProtectedRoute redirectTo='/login' isAllowed={!!user}><Home /></ProtectedRoute>} />
         <Route path='/welcome' element={<Welcome />} />
+
         <Route path='/users' element={<ManageUser />} />
+
         <Route path='/customers' element={<ManageCustomer />} />
         <Route path='/customers/:customerId/branch/:branchId/assets' element={<ManageAsset />} />
         <Route path='/customer/:customerId/branch/:branchId/asset/:assetId' element={<ManageMaintenance />} />
+
+        <Route path='work-order' element={<ManageWorkOrder />} />
       </Route>
     </Routes>
   )

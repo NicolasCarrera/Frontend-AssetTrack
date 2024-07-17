@@ -5,6 +5,7 @@ import Users from '../../assets/icons/Users'
 import Office from '../../assets/icons/Office'
 import './styles.css'
 import ToolTip from './ToolTip'
+import Clipboard from '../../assets/icons/Clipboard'
 
 export default function StickyNavbar() {
   return (
@@ -31,6 +32,13 @@ export default function StickyNavbar() {
           <NavLink to='/customers' activeClassName='active'>
             <ToolTip tooltip='Gestión de clientes'>
               <Office />
+            </ToolTip>
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to='/work-order' activeClassName='active'>
+            <ToolTip tooltip='Ordenes de trabajo'>
+              <Clipboard />
             </ToolTip>
           </NavLink>
         </li>
