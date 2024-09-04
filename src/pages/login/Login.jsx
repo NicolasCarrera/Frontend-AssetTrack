@@ -11,7 +11,7 @@ export default function Login() {
   const [token, setToken] = useState(null)
   const [error, setError] = useState({ title: '', message: [] })
 
-  const { login } = useAuth()
+  const { login, logout } = useAuth()
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -37,6 +37,10 @@ export default function Login() {
       navigate('/welcome')
     }
   }, [decodedToken])
+
+  useEffect(() => {
+    logout()
+  }, [])
 
   return (
     <div className='bg-[#0F0E17] min-h-screen flex items-center justify-center'>
