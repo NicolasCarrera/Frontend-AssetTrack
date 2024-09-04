@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import EllipsisVertical from '../../assets/icons/EllipsisVertical'
 import Pencil from '../../assets/icons/Pencil'
 import PlusCircle from '../../assets/icons/PlusCircle'
@@ -7,65 +7,73 @@ import Button from '../../components/common/Button'
 import Dropdown from '../../components/common/Dropdown'
 import Search from '../../components/common/Search'
 import { useNavigate } from 'react-router-dom'
+import { getAllCustomers, getBranchByCustomerId } from '../../services/customer-branches-service/customer'
+import FormCustomer from './FormCustomer'
+import FormBranch from './FormBranch'
+import { createBranch } from '../../services/customer-branches-service/branch'
 
 export default function ManageCustomer() {
-  const tabla1 = [
-    { id: 1, data: 'Dato 1' },
-    { id: 2, data: 'Dato 2' },
-    { id: 3, data: 'Dato 3' },
-    { id: 4, data: 'Dato 4' },
-    { id: 5, data: 'Dato 5' },
-    { id: 6, data: 'Dato 6' },
-    { id: 7, data: 'Dato 7' },
-    { id: 8, data: 'Dato 8' },
-    { id: 9, data: 'Dato 9' },
-    { id: 10, data: 'Dato 10' },
-    { id: 11, data: 'Dato 11' },
-    { id: 12, data: 'Dato 12' }
-  ]
-
   const colums = [
     { title: 'Sucursal', value: 'name' },
     { title: 'Dirección', value: 'address' },
     { title: 'Activos registrados', value: 'assets' },
   ]
-  const tabla2 = [
-    { id: 1, name: 'Sucursal 1', address: 'En la china', assets: 10 },
-    { id: 2, name: 'Sucursal 2', address: 'En la china', assets: 10 },
-    { id: 3, name: 'Sucursal 3', address: 'En la china', assets: 10 },
-    { id: 4, name: 'Sucursal 4', address: 'En la china', assets: 10 },
-    { id: 5, name: 'Sucursal 5', address: 'En la china', assets: 10 }
-  ]
 
   const navigate = useNavigate()
 
-  const [dataCustomer, setDataCustomer] = useState(tabla1)
-  const [dataBranch, setDataBranch] = useState(tabla2)
+  const [dataCustomer, setDataCustomer] = useState([])
+  const [dataBranch, setDataBranch] = useState([])
 
   const [customer, setCustomer] = useState({ id: null })
 
-  const handleCustomer = (item) => {
+  const handleCustomer = async (item) => {
     if (customer.id === item.id) {
       setCustomer({ id: null })
       setDataBranch([])
     } else {
       setCustomer(item)
-      setDataBranch(tabla2)
+      handleBranch(item.id)
     }
+  }
+
+  const handleBranch = async (id) => {
+    const newDataBranch = await getBranchByCustomerId(id)
+    setDataBranch(newDataBranch)
+  }
+
+  const [openCustomerForm, setOpenCustomerForm] = useState(false)
+
+  const toggleCustomerForm = () => {
+    setOpenCustomerForm(!openCustomerForm)
+  }
+
+  const [openBranchForm, setOpenBranchForm] = useState(true)
+
+  const toggleBranchForm = () => {
+    setOpenBranchForm(!openBranchForm)
   }
 
   const handleNavigateToAssets = (customerId, branchId) => {
     navigate(`/customers/${customerId}/branch/${branchId}/assets`)
   }
 
+  useEffect(() => {
+    const handleCustomer = async () => {
+      const newDataCustomer = await getAllCustomers()
+      setDataCustomer(newDataCustomer)
+    }
+    handleCustomer()
+  }, [])
+
   const options = [
-    <div
+    <button
       className='flex gap-4'
       key='edit'
+      onClick={createBranch}
     >
       <Pencil />
       <span>Ver o editar empresa</span>
-    </div>,
+    </button>,
     <div
       className='flex gap-4'
       key='add'
@@ -90,7 +98,7 @@ export default function ManageCustomer() {
         <Search />
         <Button
           icon={<PlusCircle />}
-          onClick={() => { }} // TODO: funcion para abrir el formulario para cliente
+          onClick={() => setOpenCustomerForm(true)}
         >
           Agregar un nuevo cliente
         </Button>
@@ -112,24 +120,36 @@ export default function ManageCustomer() {
               </thead>
               <tbody>
                 {
-                  dataCustomer.map(item => (
-                    <tr
-                      className='border-b border-gray-400 hover:bg-gray-100'
-                      key={item.id}
-                    >
-                      <td
-                        className={`px-6 py-4 ${customer.id && customer.id !== item.id ? 'text-gray-400' : 'text-black'}`}
-                        onClick={() => handleCustomer(item)}
+                  dataCustomer.length > 0 ? (
+                    dataCustomer.map(item => (
+                      <tr
+                        className='border-b border-gray-400 hover:bg-gray-100'
+                        key={item.id}
                       >
-                        {item.data}
-                      </td>
-                      <td>
-                        <Dropdown options={options}>
-                          <EllipsisVertical />
-                        </Dropdown>
+                        <td
+                          className={`px-6 py-4 ${customer.id && customer.id !== item.id ? 'text-gray-400' : 'text-black'}`}
+                          onClick={() => handleCustomer(item)}
+                        >
+                          {item.name}
+                        </td>
+                        <td>
+                          <Dropdown options={options}>
+                            <EllipsisVertical />
+                          </Dropdown>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        className='text-center py-4'
+                        colSpan='2'
+                      >
+                        No hay datos disponibles.
                       </td>
                     </tr>
-                  ))
+                  )
+
                 }
               </tbody>
             </table>
@@ -170,7 +190,7 @@ export default function ManageCustomer() {
                       {
                         colums.map(column => (
                           <td
-                            className='py-4'
+                            className='px-6 py-4'
                             key={column.value}
                           >
                             {
@@ -194,6 +214,8 @@ export default function ManageCustomer() {
           </div>
         </div>
       </div>
+      <FormCustomer isOpen={openCustomerForm} onClose={toggleCustomerForm} />
+      <FormBranch isOpen={openBranchForm} onClose={toggleBranchForm} />
     </>
   )
 }

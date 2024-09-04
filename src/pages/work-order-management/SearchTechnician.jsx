@@ -1,6 +1,6 @@
-import { useState } from "react";
-import Close from "../../assets/icons/Close";
-import Search from "../../components/common/Search";
+import { useState } from 'react';
+import Close from '../../assets/icons/Close';
+import Search from '../../components/common/Search';
 
 export default function SearchTechnician({ isOpen, onClose }) {
 
@@ -37,7 +37,7 @@ export default function SearchTechnician({ isOpen, onClose }) {
 
   return (
     <div className='w-full h-screen absolute top-0 left-0 flex items-center justify-center bg-black/50'>
-      <div className="w-fit h-5/6 relative box-border rounded-md bg-[#0F0E17] text-[#FFFFFE] px-10 pt-10 pb-20">
+      <div className='w-fit h-5/6 relative box-border rounded-md shadow-lg bg-[#0F0E17] text-[#FFFFFE] px-10 pt-10 pb-20'>
         <div className='flex flex-col-reverse gap-4 md:flex-row md:justify-between mb-5'>
           <Search />
           <button>
@@ -54,7 +54,7 @@ export default function SearchTechnician({ isOpen, onClose }) {
                 key={item.id}
                 onClick={() => handleTechnical(item)}
               >
-                <span className="max-w-52 whitespace-pre-wrap">
+                <span className='max-w-52 whitespace-pre-wrap'>
                   {
                     item.name
                   }

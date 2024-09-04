@@ -18,3 +18,9 @@ Para iniciar el proyecto en modo desarrollo, ejecuta el siguiente comando:
 ```
 npm run dev
 ```
+
+## Inicia el servidor json-server
+Esto iniciará un servidor en http://localhost:3000 que servirá los datos de tu archivo bd.json.
+```
+npm start
+```

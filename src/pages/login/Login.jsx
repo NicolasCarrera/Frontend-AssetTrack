@@ -1,41 +1,49 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loginUser } from '../../services/user-role-management-service/users'
+import useDecodeJWT from '../../hooks/useDecodeJWT'
+import Alert from '../../components/common/Alert'
+import useAuth from '../../hooks/useAuth'
 
 export default function Login() {
   const navigate = useNavigate()
-  const [errorMessage, setErrorMessage] = useState('')
+
+  const [token, setToken] = useState(null)
+  const [error, setError] = useState({ title: '', message: [] })
+
+  const { login } = useAuth()
 
   const handleLogin = async (event) => {
     event.preventDefault()
     const identification = event.target.elements.identification.value
     const password = event.target.elements.password.value
 
-    // const logged = await loginUser(identification, password)
-
-    // if (!logged) {
-    //   setErrorMessage('El usuario o la contraseña son incorrectos')
-    //   return
-    // }
-
-    sessionStorage.setItem('user', {
-      id: 1,
-      name: 'Usuario',
-      permissions: [''],
-      roles: ['admin'],
-    })
-
-    navigate('/welcome')
+    try {
+      const fetchedToken = await loginUser(identification, password)
+      setToken(fetchedToken)
+      setError({ title: '', message: [] })
+    } catch (error) {
+      console.error('Failed to fetch token:', error)
+      setError({ title: 'Error al iniciar sesión', message: ['Inténtalo de nuevo.'] })
+      setToken(null)
+    }
   }
+
+  const decodedToken = useDecodeJWT(token)
+
+  useEffect(() => {
+    if (decodedToken) {
+      login(decodedToken)
+      navigate('/welcome')
+    }
+  }, [decodedToken])
 
   return (
     <div className='bg-[#0F0E17] min-h-screen flex items-center justify-center'>
+      <Alert title={error.title} message={error.message} />
       <form
         className='w-full max-w-xs space-y-8 text-[#FFFFFE]'
         onSubmit={handleLogin}>
-        {
-          errorMessage && <p>{errorMessage}</p>
-        }
         <h1 className='mb-12 text-center text-5xl font-extrabold tracking-tight'>Asset Track</h1>
         <label className='block'>
           <span className='block mb-2 text-sm font-medium'>

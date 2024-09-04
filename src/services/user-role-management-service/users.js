@@ -1,12 +1,17 @@
 import axios from 'axios'
 
 const API_ADDRESS = import.meta.env.VITE_API_ADDRESS
+const JSON_SERVER = import.meta.env.VITE_JSON_SERVER
 
 export const loginUser = async (identification, password) => {
-  const response = await axios.post(`${API_ADDRESS}/auth/log-in`, {
-    identification: identification,
-    password: password,
-  })
+  // API_URL
+  // const response = await axios.post(`${API_ADDRESS}/auth/log-in`, {
+  //   identification: identification,
+  //   password: password,
+  // })
+
+  // JSON_SERVER
+  const response = await axios.get(`${JSON_SERVER}/token`)
   return response.data
 }
 
