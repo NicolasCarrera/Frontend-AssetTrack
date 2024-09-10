@@ -2,18 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 
 export default function Dropdown({ children, options }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedOption, setSelectedOption] = useState('')
   const dropdownRef = useRef(null)
 
   const handleClick = (event) => {
     event.stopPropagation()
     setIsOpen(!isOpen)
-  }
-
-  const handleOptionClick = (event, option) => {
-    event.stopPropagation()
-    setSelectedOption(option)
-    setIsOpen(false)
   }
 
   const closeDropdown = () => {
@@ -45,11 +38,11 @@ export default function Dropdown({ children, options }) {
         isOpen &&
         <ul className='fixed bg-[#0F0E17] text-[#FFFFFE] rounded-md shadow-lg'>
           {
-            options.map(option => (
+            options.map((option, index) => (
               <li
                 className='px-4 py-2 hover:text-[#FF8906] cursor-pointer whitespace-nowrap'
-                key={option}
-                onClick={(event) => handleOptionClick(event, option)}
+                key={index}
+                onClick={() => setIsOpen(false)}
               >
                 {option}
               </li>
