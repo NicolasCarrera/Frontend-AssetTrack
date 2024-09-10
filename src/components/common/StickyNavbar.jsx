@@ -3,7 +3,6 @@ import Tools from '../../assets/icons/Tools'
 import Home from '../../assets/icons/Home'
 import Users from '../../assets/icons/Users'
 import Office from '../../assets/icons/Office'
-import './styles.css'
 import ToolTip from './ToolTip'
 import Clipboard from '../../assets/icons/Clipboard'
 import Exit from '../../assets/icons/Exit'
@@ -17,28 +16,40 @@ export default function StickyNavbar() {
         </div>
         <ul className='my-5 flex flex-col gap-4 list-none'>
           <li>
-            <NavLink to='/welcome' activeClassName='active'>
+            <NavLink
+              to='/welcome'
+              className={({ isActive }) => (isActive ? 'text-[#FF8906]' : 'text-[#FFFFFE]')}
+            >
               <ToolTip tooltip='Inicio'>
                 <Home />
               </ToolTip>
             </NavLink>
           </li>
           <li>
-            <NavLink to='/users' activeClassName='active'>
+            <NavLink
+              to='/users'
+              className={({ isActive }) => (isActive ? 'text-[#FF8906]' : 'text-[#FFFFFE]')}
+            >
               <ToolTip tooltip='Gestión de usuarios'>
                 <Users />
               </ToolTip>
             </NavLink>
           </li>
           <li>
-            <NavLink to='/customers' activeClassName='active'>
+            <NavLink
+              to='/customers'
+              className={({ isActive }) => (isActive ? 'text-[#FF8906]' : 'text-[#FFFFFE]')}
+            >
               <ToolTip tooltip='Gestión de clientes'>
                 <Office />
               </ToolTip>
             </NavLink>
           </li>
           <li>
-            <NavLink to='/work-order' activeClassName='active'>
+            <NavLink
+              to='/work-order'
+              className={({ isActive }) => (isActive ? 'text-[#FF8906]' : 'text-[#FFFFFE]')}
+            >
               <ToolTip tooltip='Ordenes de trabajo'>
                 <Clipboard />
               </ToolTip>
