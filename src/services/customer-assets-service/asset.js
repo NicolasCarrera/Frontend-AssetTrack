@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { removeCircularReferences } from '../../utils/fix'
 
 const API_ADDRESS = `${import.meta.env.VITE_JSON_SERVER}/assets`
 
@@ -24,7 +25,8 @@ export const getAssetById = async (id) => {
 
 export const createAsset = async (assetData) => {
   try {
-    const response = await axios.post(`${API_ADDRESS}`, assetData)
+    const cleanedData = removeCircularReferences(assetData)
+    const response = await axios.post(`${API_ADDRESS}`, cleanedData)
     return response.data
   } catch (error) {
     console.error(error)
@@ -33,7 +35,8 @@ export const createAsset = async (assetData) => {
 
 export const updateAsset = async (id, assetData) => {
   try {
-    const response = await axios.put(`${API_ADDRESS}/${id}`, assetData)
+    const cleanedData = removeCircularReferences(assetData)
+    const response = await axios.put(`${API_ADDRESS}/${id}`, cleanedData)
     return response.data
   } catch (error) {
     console.error(error)

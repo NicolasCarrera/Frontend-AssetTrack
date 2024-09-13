@@ -203,13 +203,13 @@ export default function ManageCustomer() {
                     dataCompanies.map(item => (
                       <tr
                         className='border-b border-gray-400 hover:bg-gray-100'
-                        key={item.id}
+                        key={item?.id}
                       >
                         <td
                           className={`px-6 py-4 ${selectCompany.id && selectCompany.id !== item.id ? 'text-gray-400' : 'text-black'}`}
                           onClick={() => handleSelectCompany(item)}
                         >
-                          {item.name}
+                          {item?.name}
                         </td>
                         <td>
                           <Dropdown options={getCompanyEditingOptions(item)}>
@@ -263,8 +263,8 @@ export default function ManageCustomer() {
                   dataBranches.map(item => (
                     <tr
                       className='border-b border-gray-400'
-                      key={item.id}
-                      onClick={() => handleNavigateToAssets(selectCompany.id, item.id)}
+                      key={item?.id}
+                      onClick={() => handleNavigateToAssets(selectCompany.id, item?.id)}
                     >
                       {
                         colums.map(column => (

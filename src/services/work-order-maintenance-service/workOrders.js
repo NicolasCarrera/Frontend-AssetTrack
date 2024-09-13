@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { removeCircularReferences } from '../../utils/fix'
 
 const API_ADDRESS = `${import.meta.env.VITE_JSON_SERVER}/work-orders`
 
@@ -24,7 +25,8 @@ export const getWorkOrdersByAssetId = async (assetId) => {
 
 export const updateWorkOrder = async (id, workOrderData) => {
     try {
-        const response = await axios.put(`${API_ADDRESS}/${id}`, workOrderData)
+        const cleanedData = removeCircularReferences(workOrderData)
+        const response = await axios.put(`${API_ADDRESS}/${id}`, cleanedData)
         return response.data
     } catch (error) {
         console.error(error)

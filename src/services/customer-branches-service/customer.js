@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { removeCircularReferences } from '../../utils/fix'
 
 const API_ADDRESS = `${import.meta.env.VITE_JSON_SERVER}/companies`
 
@@ -24,7 +25,8 @@ export const getCustomerById = async (id) => {
 
 export const createCustomer = async (customerData) => {
   try {
-    const response = await axios.post(`${API_ADDRESS}`, customerData)
+    const cleanedData = removeCircularReferences(customerData)
+    const response = await axios.post(`${API_ADDRESS}`, cleanedData)
     return response.data
   } catch (error) {
     console.error(error)
@@ -33,7 +35,8 @@ export const createCustomer = async (customerData) => {
 
 export const updateCustomer = async (id, customerData) => {
   try {
-    const response = await axios.put(`${API_ADDRESS}/${id}`, customerData)
+    const cleanedData = removeCircularReferences(customerData)
+    const response = await axios.put(`${API_ADDRESS}/${id}`, cleanedData)
     return response.data
   } catch (error) {
     console.error(error)

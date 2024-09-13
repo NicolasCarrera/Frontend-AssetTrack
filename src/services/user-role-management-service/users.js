@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { removeCircularReferences } from '../../utils/fix'
 
 const API_ADDRESS = import.meta.env.VITE_JSON_SERVER
 
@@ -7,13 +8,15 @@ export const loginUser = async (identification, password) => {
 }
 
 export const signupUser = async (userData) => {
-  const response = await axios.post(`${API_ADDRESS}/users`, userData)
+  const cleanedData = removeCircularReferences(userData)
+  const response = await axios.post(`${API_ADDRESS}/users`, cleanedData)
   console.log('Usuario creado:', response.data)
   return response.data
 }
 
 export const updateUser = async (id, userData) => {
-  const response = await axios.put(`${API_ADDRESS}/users/${id}`, userData)
+  const cleanedData = removeCircularReferences(userData)
+  const response = await axios.put(`${API_ADDRESS}/users/${id}`, cleanedData)
   return response.data
 }
 
