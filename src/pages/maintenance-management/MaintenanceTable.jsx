@@ -1,22 +1,32 @@
-import Chip from "../../components/common/Chip"
+import { useEffect, useState } from 'react'
+import Chip from '../../components/common/Chip'
+import { defaultWorkOrderData } from '../../utils/objects/workOrder'
 
-export default function MaintenanceTable() {
+export default function MaintenanceTable({ workOrders = [] }) {
+  const [dataWorkOrders, setDataWorkOrders] = useState([defaultWorkOrderData])
+  useEffect(() => {
+    const transformedWorkOrders = workOrders.map(workOrder => ({
+      ...workOrder,
+      status:
+        <Chip
+          variant={
+            workOrder.status === 'Pendiente' ? 'yellow' :
+              workOrder.status === 'En proceso' ? 'green' :
+                workOrder.status === 'Urgente' ? 'red' : 'grey'
+          }
+        >
+          {workOrder.status}
+        </Chip>
+    }))
+    setDataWorkOrders(transformedWorkOrders)
+  }, [workOrders])
+
   const colums = [
     { title: 'Tipo de mantenimiento', value: 'type' },
     { title: 'Fecha programada', value: 'date' },
     { title: 'Estado', value: 'status' }
   ]
-  const maintenance = [
-    { id: 1, type: 'Preventivo', date: '12/07/2024', status: <Chip variant='yellow'>Pendiente</Chip> },
-    { id: 2, type: 'Preventivo', date: '12/07/2024', status: 'Pendiente' },
-    { id: 3, type: 'Preventivo', date: '12/07/2024', status: 'Pendiente' },
-    { id: 4, type: 'Preventivo', date: '12/07/2024', status: 'Pendiente' },
-    { id: 5, type: 'Preventivo', date: '12/07/2024', status: 'Pendiente' },
-    { id: 6, type: 'Preventivo', date: '12/07/2024', status: 'Pendiente' },
-    { id: 7, type: 'Preventivo', date: '12/07/2024', status: 'Pendiente' },
-    { id: 8, type: 'Preventivo', date: '12/07/2024', status: 'Pendiente' },
-    { id: 9, type: 'Preventivo', date: '12/07/2024', status: 'Pendiente' },
-  ]
+
   return (
     <div>
       <table className='w-full'>
@@ -36,7 +46,7 @@ export default function MaintenanceTable() {
         </thead>
         <tbody>
           {
-            maintenance.map(item => (
+            dataWorkOrders.map(item => (
               <tr
                 className='border-b border-gray-400 hover:bg-gray-100'
                 key={item.id}

@@ -1,29 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Close from '../../assets/icons/Close';
 import Search from '../../components/common/Search';
+import { defaultUserData } from '../../utils/objects/user';
+import { getUserByRole } from '../../services/user-role-management-service/users';
 
-export default function SearchTechnician({ isOpen, onClose }) {
+export default function SearchTechnician({ isOpen, onClose, onClick }) {
+  const [dataTechnicians, setDataTechnicians] = useState([defaultUserData])
+  const [technical, setTechnical] = useState(defaultUserData)
 
-  const technicians = [
-    { id: 1, avatar: '', name: 'Tecnico A' },
-    { id: 2, avatar: '', name: 'Tecnico B' },
-    { id: 3, avatar: '', name: 'Tecnico C' },
-    { id: 4, avatar: '', name: 'Tecnico D' },
-    { id: 5, avatar: '', name: 'Tecnico E' },
-    { id: 6, avatar: '', name: 'Tecnico F' },
-    { id: 7, avatar: '', name: 'Tecnico E' },
-    { id: 8, avatar: '', name: 'Tecnico E' },
-    { id: 9, avatar: '', name: 'Tecnico E' },
-    { id: 10, avatar: '', name: 'Tecnico E' },
-    { id: 11, avatar: '', name: 'Tecnico E' },
-    { id: 12, avatar: '', name: 'Tecnico E' },
-    { id: 13, avatar: '', name: 'Tecnico E' },
-    { id: 14, avatar: '', name: 'Tecnico E' },
-    { id: 15, avatar: '', name: 'Tecnico E' },
-    { id: 16, avatar: '', name: 'Tecnico E' },
-  ]
-
-  const [technical, setTechnical] = useState({ id: null })
+  useEffect(() => {
+    const fetchTechniciansData = async () => {
+      const newDataTechnicians = await getUserByRole('Técnico de Mantenimiento')
+      setDataTechnicians(newDataTechnicians)
+    }
+    fetchTechniciansData()
+  }, [])
 
   const handleTechnical = (item) => {
     if (technical.id === item.id) {
@@ -31,6 +22,11 @@ export default function SearchTechnician({ isOpen, onClose }) {
     } else {
       setTechnical(item)
     }
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    onClick(technical)
   }
 
   if (!isOpen) return null
@@ -48,7 +44,7 @@ export default function SearchTechnician({ isOpen, onClose }) {
         </div>
         <ul className='h-full overflow-y-auto'>
           {
-            technicians.map(item => (
+            dataTechnicians.map(item => (
               <li
                 className={`flex items-center justify-between py-2 hover:text-[#FF8906] ${technical.id === item.id ? 'text-[#FF8906]' : 'text-[#FFFFFE]'}`}
                 key={item.id}
@@ -56,14 +52,14 @@ export default function SearchTechnician({ isOpen, onClose }) {
               >
                 <span className='max-w-52 whitespace-pre-wrap'>
                   {
-                    item.name
+                    `${item.firstName} ${item.lastName}`
                   }
                 </span>
                 {
                   technical.id === item.id &&
                   <button
                     className='bg-[#FF8906] text-[#FFFFFE] px-4 py-2 rounded-md'
-                    onClick={() => { }}
+                    onClick={handleSubmit}
                   >
                     Asignar
                   </button>

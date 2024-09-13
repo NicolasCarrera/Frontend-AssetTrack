@@ -14,14 +14,13 @@ export default function AppRoutes() {
     <Routes>
       <Route path='/login' element={<Login />} />
       <Route path='/' element={<ProtectedRoute><Home /></ProtectedRoute>}>
-        {/* <Route index element={<ProtectedRoute redirectTo='/login' isAllowed={!!user}><Home /></ProtectedRoute>} /> */}
         <Route path='/welcome' element={<Welcome />} />
 
         <Route path='/users' element={<ManageUser />} />
 
         <Route path='/customers' element={<ManageCustomer />} />
-        <Route path='/customers/:customerId/branch/:branchId/assets' element={<ManageAsset />} />
-        <Route path='/customer/:customerId/branch/:branchId/asset/:assetId' element={<ManageMaintenance />} />
+        <Route path='/customers/:customerId/branches' element={<ManageAsset />} />
+        <Route path='/customers/:customerId/branches/:branchId/asset/:assetId' element={<ManageMaintenance />} />
 
         <Route path='work-order' element={<ManageWorkOrder />} />
       </Route>

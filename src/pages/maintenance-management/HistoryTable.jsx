@@ -1,19 +1,33 @@
-export default function HistoryTable() {
+import { useEffect, useState } from 'react'
+import { defaultReportData } from '../../utils/objects/report'
+import { getUserById } from '../../services/user-role-management-service/users'
+
+export default function HistoryTable({ reports = [] }) {
+  const [dataReports, setDataReports] = useState([defaultReportData])
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (reports.length > 0) {
+        const updatedData = await Promise.all(reports.map(async (report) => {
+          if (report.userId) {
+            const userData = await getUserById(report.userId)
+            return {
+              ...report,
+              technician: userData.firstName,
+            }
+          }
+          return { ...report, technician: '' }
+        }))
+        setDataReports(updatedData)
+      }
+    }
+    fetchUserData()
+  }, [reports])
+
   const colums = [
     { title: 'Tipo de mantenimiento', value: 'type' },
     { title: 'Fecha programada', value: 'date' },
     { title: 'Técnico', value: 'technician' }
-  ]
-  const history = [
-    { id: 1, type: 'Preventivo', date: '12/07/2024', technician: 'Don Segundo' },
-    { id: 2, type: 'Preventivo', date: '12/07/2024', technician: 'Don Segundo' },
-    { id: 3, type: 'Preventivo', date: '12/07/2024', technician: 'Don Segundo' },
-    { id: 4, type: 'Preventivo', date: '12/07/2024', technician: 'Don Segundo' },
-    { id: 5, type: 'Preventivo', date: '12/07/2024', technician: 'Don Segundo' },
-    { id: 6, type: 'Preventivo', date: '12/07/2024', technician: 'Don Segundo' },
-    { id: 7, type: 'Preventivo', date: '12/07/2024', technician: 'Don Segundo' },
-    { id: 8, type: 'Preventivo', date: '12/07/2024', technician: 'Don Segundo' },
-    { id: 9, type: 'Preventivo', date: '12/07/2024', technician: 'Don Segundo' },
   ]
 
   return (
@@ -35,7 +49,7 @@ export default function HistoryTable() {
         </thead>
         <tbody>
           {
-            history.map(item => (
+            dataReports.map(item => (
               <tr
                 className='border-b border-gray-400 hover:bg-gray-100'
                 key={item.id}

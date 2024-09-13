@@ -3,54 +3,85 @@ import Camera from '../../assets/icons/Camera'
 import Close from '../../assets/icons/Close'
 import Pencil from '../../assets/icons/Pencil'
 import { signupUser, updateUser } from '../../services/user-role-management-service/users'
-import { getAllRoles } from '../../services/user-role-management-service/roles'
+import { useRecoilState } from 'recoil'
+import { alertUserManagementPage } from '../../state/alertMessagesAtom'
 
 export default function FormUser({ isOpen, onClose, data }) {
 
+  const [alertModal, setAlertModal] = useRecoilState(alertUserManagementPage)
 
-  const [roles, setRoles] = useState([])
+  // Estados para los tipos de documento y roles disponibles
+  const [documentTypes, setDocumentTypes] = useState([])
+  const [availableRoles, setAvailableRoles] = useState([])
 
+  // Efecto para cargar los tipos de documento y roles
   useEffect(() => {
-    const fetchRoles = async () => {
-      const newRoles = await getAllRoles()
-      setRoles(newRoles)
-    }
-    fetchRoles()
+    setDocumentTypes([
+      {
+        id: 1,
+        type: 'Cédula de identidad',
+        value: 'IDENTITY_CARD'
+      },
+      {
+        id: 2,
+        type: 'Pasaporte',
+        value: 'PASSPORT'
+      },
+      {
+        id: 3,
+        type: 'Otro',
+        value: 'OTHER'
+      }
+    ]);
+    setAvailableRoles([
+      {
+        id: 1,
+        name: 'Gerente de Mantenimiento'
+      },
+      {
+        id: 2,
+        name: 'Técnico de Mantenimiento'
+      },
+      {
+        id: 3,
+        name: 'Usuarios'
+      }
+    ]);
   }, [])
-
-  if (!isOpen) return null
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     const userData = {
       id: event.target.elements.id.value,
-      username: 'sistema 1', // eliminar
-      password: '12345',
-      names: event.target.elements.names.value,
+      firstName: event.target.elements.names.value,
       lastName: event.target.elements.lastName.value,
       email: event.target.elements.email.value,
-      phoneNumber: event.target.elements.phoneNumber.value,
-      identityDocuments: [
+      phone: event.target.elements.phoneNumber.value,
+      document: [
         {
-          documentType: event.target.elements.documentType.value,
-          identification: event.target.elements.identification.value
+          type: event.target.elements.documentType.value,
+          value: event.target.elements.identification.value
         }
       ],
-      roles: [event.target.elements.role.value],
-      status: event.target.elements.status.value
+      status: event.target.elements.status.value,
+      roles: [event.target.elements.role.value]
     }
     try {
       if (userData.id) {
-        const response = await updateUser(userData.id, userData)
-        console.log('Los datos del usuario se han actualizado:', response)
+        await updateUser(userData.id, userData)
+        setAlertModal({ title: 'Usuario actualizado', message: ['Los datos del usuario se han actualizado'] })
       } else {
-        const response = await signupUser(userData)
-        console.log('Usuario registrado exitosamente:', response)
+        await signupUser(userData)
+        setAlertModal({ title: 'Usuario ingresado', message: ['El usuario a sido registrado exitosamente'] })
       }
     } catch (error) {
       console.error('Error al registrar el usuario:', error.response?.data || error.message)
+    } finally {
+      onClose()
     }
   }
+
+  if (!isOpen) return null
 
   return (
     <div className='w-full h-screen absolute top-0 left-0 flex items-center justify-center bg-black/50'>
@@ -72,28 +103,6 @@ export default function FormUser({ isOpen, onClose, data }) {
           onSubmit={handleSubmit}
         >
           <input type='hidden' name='id' defaultValue={data.id} />
-          <div className='flex justify-center'>
-            <label>
-              {
-                data.avatar ?
-                  <img
-                    className='size-40 aspect-square rounded-full cursor-pointer'
-                    src={data.avatar}
-                    alt='Avatar'
-                  />
-                  :
-                  <div className='flex items-center justify-center size-40 rounded-full bg-[#FFFFFE] text-[#0F0E17] cursor-pointer'>
-                    <Camera />
-                  </div>
-              }
-              <input
-                className='hidden'
-                type='file'
-                name='avatar'
-              />
-            </label>
-          </div>
-
           <fieldset className='grid grid-cols-1 md:grid-cols-2 gap-4 my-4'>
             <legend className='font-bold mb-2'>Datos Personales</legend>
             <label className='block'>
@@ -102,7 +111,7 @@ export default function FormUser({ isOpen, onClose, data }) {
                 className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
                 type='text'
                 name='names'
-                defaultValue={data.names}
+                defaultValue={data.firstName}
               />
             </label>
             <label className='block'>
@@ -120,7 +129,7 @@ export default function FormUser({ isOpen, onClose, data }) {
                 className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
                 type='text'
                 name='phoneNumber'
-                defaultValue={data.phoneNumber}
+                defaultValue={data.phone}
               />
             </label>
             <label className='block'>
@@ -140,7 +149,7 @@ export default function FormUser({ isOpen, onClose, data }) {
               <select
                 className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
                 name='documentType'
-                defaultValue={data.documents[0].type}
+                defaultValue={data.document[0].type}
               >
                 <option value='IDENTITY_CARD'>Cédula de identidad</option>
                 <option value='PASSPORT'>Pasaporte</option>
@@ -153,7 +162,7 @@ export default function FormUser({ isOpen, onClose, data }) {
                 className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
                 type='text'
                 name='identification'
-                defaultValue={data.documents[0].value}
+                defaultValue={data.document[0].value}
               />
             </label>
           </fieldset>
@@ -166,13 +175,13 @@ export default function FormUser({ isOpen, onClose, data }) {
                 name='role'
               >
                 {
-                  roles.map(role => (
+                  availableRoles.map(role => (
                     <option
                       key={role.id}
-                      value={role.roleName}
+                      value={role.name}
                     >
                       {
-                        role.roleName.charAt(0).toUpperCase() + role.roleName.slice(1).toLowerCase()
+                        role.name
                       }
                     </option>
                   ))
@@ -193,7 +202,7 @@ export default function FormUser({ isOpen, onClose, data }) {
           <button
             className='block max-w-80 w-full mx-auto my-16 px-4 py-2 rounded-md bg-[#FF8906]'
             type='submit'>
-            Guardar cambios
+            Guardar
           </button>
         </form>
       </div>

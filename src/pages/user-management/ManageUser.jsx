@@ -8,13 +8,34 @@ import Search from '../../components/common/Search'
 import { useEffect } from 'react'
 import ChevronLeft from '../../assets/icons/ChevronLeft'
 import ChevronRight from '../../assets/icons/ChevronRight'
-import { getAllUsers, getUserById } from '../../services/user-role-management-service/users'
+import { deleteUsers, getAllUsers, getUserById } from '../../services/user-role-management-service/users'
 import FormUser from './FormUser'
+import Alert from '../../components/common/Alert'
+import { useRecoilState } from 'recoil'
+import { alertUserManagementPage } from '../../state/alertMessagesAtom'
 
 // TODO: Añadir funcion de busqueda
 // TODO: Añadir mas parametros a la tabla
 // TODO: Coregir los diseños
+const initialUserData = {
+  id: null,
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  document: [
+    {
+      type: '',
+      value: ''
+    }
+  ],
+  status: '',
+  roles: []
+}
+
 export default function ManageUser() {
+
+  const [alertModal, setAlertModal] = useRecoilState(alertUserManagementPage)
 
   const [data, setData] = useState([])
 
@@ -26,24 +47,6 @@ export default function ManageUser() {
   const [totalElements, setTotalElements] = useState(0)
 
   const [isOpenForm, setIsOpenForm] = useState(false)
-
-  const initialUserData = {
-    id: null,
-    avatar: '',
-    username: '',
-    names: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    documents: [
-      {
-        type: '',
-        value: ''
-      }
-    ],
-    status: '',
-    roles: []
-  }
 
   const [user, setUser] = useState(initialUserData)
 
@@ -63,23 +66,21 @@ export default function ManageUser() {
   }
 
   const colums = [
-    { title: '', value: 'avatar' },
-    { title: 'Nombre', value: 'username' },
+    { title: 'Nombre', value: 'firstName' },
     { title: 'Rol', value: 'roles' },
     { title: 'Estado', value: 'status' }
   ]
 
   const handleUserPage = async (page, size) => {
     const data = await getAllUsers(page, size)
-    const newUserData = data.users.map(user => ({
+    const newUserData = data.map(user => ({
       ...user,
-      avatar: <img className='size-7 aspect-square rounded-full' src={user.avatar} alt='Avatar' />,
       status: <Chip variant='green'>{user.status}</Chip>,
-      roles: user.roles ? user.roles.map(role => role.roleName).join(', ') : ''
+      roles: user.roles ? user.roles.map(role => role).join(', ') : ''
     }))
     setData(newUserData)
-    setTotalPages(data.page.totalPages)
-    setTotalElements(data.page.totalElements)
+    //setTotalPages(data.page.totalPages)
+    //setTotalElements(data.page.totalElements)
   }
 
   useEffect(() => {
@@ -91,6 +92,7 @@ export default function ManageUser() {
       <h1 className='text-3xl font-bold mb-10'>
         Gestión de usuarios
       </h1>
+      <Alert title={alertModal.title} message={alertModal.message} />
       <div className='flex flex-col-reverse gap-4 md:flex-row md:justify-between mb-5'>
         <Search />
         <Button
@@ -142,7 +144,7 @@ export default function ManageUser() {
                   <button onClick={() => openEditScreen(item.id)}>
                     <Pencil />
                   </button>
-                  <button>
+                  <button onClick={() => deleteUsers(item.id)}>
                     <Trash />
                   </button>
                 </td>

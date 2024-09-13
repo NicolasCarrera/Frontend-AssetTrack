@@ -57,7 +57,6 @@ export default function Login() {
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
             type='text'
             name='identification'
-            required
           />
         </label>
         <label className='block'>
@@ -68,7 +67,7 @@ export default function Login() {
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
             type='password'
             name='password'
-            required />
+          />
         </label>
 
         <button
