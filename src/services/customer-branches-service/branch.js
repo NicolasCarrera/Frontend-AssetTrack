@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { removeCircularReferences } from '../../utils/fix'
+import { defaultBranchData } from '../../utils/objects/branch'
 
 const API_ADDRESS = `${import.meta.env.VITE_JSON_SERVER}/branches`
 
@@ -19,7 +20,7 @@ export const getBranchById = async (id) => {
     return response.data
   } catch (error) {
     console.error(error)
-    return []
+    return defaultBranchData
   }
 }
 

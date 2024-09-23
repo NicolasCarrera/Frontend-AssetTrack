@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { removeCircularReferences } from '../../utils/fix'
+import { defaultCompanyData } from '../../utils/objects/company'
 
 const API_ADDRESS = `${import.meta.env.VITE_JSON_SERVER}/companies`
 
@@ -19,7 +20,7 @@ export const getCustomerById = async (id) => {
     return response.data
   } catch (error) {
     console.error(error)
-    return []
+    return defaultCompanyData
   }
 }
 
@@ -58,5 +59,15 @@ export const getCustomersByName = async (name) => {
     return response.data
   } catch (error) {
     console.error(error)
+  }
+}
+
+export const getCustomerByUserId = async (userId) => {
+  try {
+    const response = await axios.get(`${API_ADDRESS}?userId=${userId}`)
+    return response.data[0]
+  } catch (error) {
+    console.error(error)
+    return defaultCompanyData
   }
 }

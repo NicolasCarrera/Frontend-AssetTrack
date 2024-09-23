@@ -14,9 +14,15 @@ import ModalForm from '../../components/common/ModalForm'
 import { defaultBranchData } from '../../utils/objects/branch'
 import { createBranch, deleteBranch, getBranchesByCompanyId, updateBranch } from '../../services/customer-branches-service/branch'
 import { defaultCompanyData } from '../../utils/objects/company'
+import { useRecoilValue } from 'recoil'
+import { userState } from '../../state/userAtom'
 
 export default function ManageCustomer() {
   const navigate = useNavigate()
+
+  const user = useRecoilValue(userState)
+
+  const isAdmin = user.roles.some(role => role === 'Gerente de Mantenimiento')
 
   const [dataCompanies, setDataCompanies] = useState([])
   const [dataBranches, setDataBranches] = useState([])
@@ -173,15 +179,18 @@ export default function ManageCustomer() {
       <h1 className='text-3xl font-bold mb-10'>
         Gestión de clientes
       </h1>
-      <div className='flex flex-col-reverse gap-4 md:flex-row md:justify-between mb-5'>
-        <Search onSearch={setSearchTerm} />
-        <Button
-          icon={<PlusCircle />}
-          onClick={handleOpenCompanyForm}
-        >
-          Agregar un nuevo cliente
-        </Button>
-      </div>
+      {
+        isAdmin &&
+        <div className='flex flex-col-reverse gap-4 md:flex-row md:justify-between mb-5'>
+          <Search onSearch={setSearchTerm} />
+          <Button
+            icon={<PlusCircle />}
+            onClick={handleOpenCompanyForm}
+          >
+            Agregar un nuevo cliente
+          </Button>
+        </div>
+      }
       <div className='flex gap-2'>
 
         <div className='w-80'>
@@ -212,9 +221,12 @@ export default function ManageCustomer() {
                           {item?.name}
                         </td>
                         <td>
-                          <Dropdown options={getCompanyEditingOptions(item)}>
-                            <EllipsisVertical />
-                          </Dropdown>
+                          {
+                            isAdmin &&
+                            <Dropdown options={getCompanyEditingOptions(item)}>
+                              <EllipsisVertical />
+                            </Dropdown>
+                          }
                         </td>
                       </tr>
                     ))
@@ -279,9 +291,12 @@ export default function ManageCustomer() {
                         ))
                       }
                       <td key='actions'>
-                        <Dropdown options={getBranchEditingOptions(item)}>
-                          <EllipsisVertical />
-                        </Dropdown>
+                        {
+                          isAdmin &&
+                          <Dropdown options={getBranchEditingOptions(item)}>
+                            <EllipsisVertical />
+                          </Dropdown>
+                        }
                       </td>
                     </tr>
                   ))

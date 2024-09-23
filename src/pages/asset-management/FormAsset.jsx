@@ -12,7 +12,7 @@ export default function FormAsset({ onSubmit, initialData = null }) {
     } else {
       setFormData(defaultAssetData);
     }
-  }, [initialData]);
+  }, [initialData])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -101,7 +101,6 @@ export default function FormAsset({ onSubmit, initialData = null }) {
           <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Descripción</span>
           <textarea
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
-            type=''
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             readOnly={!isEditable}

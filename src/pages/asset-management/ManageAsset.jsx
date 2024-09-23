@@ -12,9 +12,15 @@ import ModalForm from '../../components/common/ModalForm'
 import FormAsset from './FormAsset'
 import { defaultAssetData } from '../../utils/objects/asset'
 import { createAsset, deleteAsset, getAllAssetsByBranchId, getAllAssetsUnderMaintenanceByBranchId, getAssetsByFilter, updateAsset } from '../../services/customer-assets-service/asset'
+import { useRecoilValue } from 'recoil'
+import { userState } from '../../state/userAtom'
 
 export default function ManageAsset() {
   const location = useLocation()
+
+  const user = useRecoilValue(userState)
+
+  const isAdmin = user.roles.some(role => role === 'Gerente de Mantenimiento')
 
   const { customerId } = useParams()
   const { branchId } = location.state || {}
@@ -40,12 +46,15 @@ export default function ManageAsset() {
         const data = await getBranchesByClient(customerId)
         setDataCompany({ ...defaultCompanyData, ...data })
         if (data.branches.length > 0) {
+          setDataBranches(data.branches)
           if (!selectedBranchId) {
             setSelectedBranchId(data.branches[0].id)
+            setSelectedDataBranch(data.branches.find(branch => branch.id === data.branches[0].id))
+            await fetchDataAssets(data.branches[0].id)
+          } else {
+            setSelectedDataBranch(data.branches.find(branch => branch.id === selectedBranchId))
+            await fetchDataAssets(selectedBranchId)
           }
-          setDataBranches(data.branches)
-          setSelectedDataBranch(data.branches.find(branch => branch.id === selectedBranchId))
-          await fetchDataAssets(selectedBranchId)
         }
       }
     }
@@ -164,17 +173,21 @@ export default function ManageAsset() {
       </h2>
       <div className='flex flex-col-reverse gap-4 md:flex-row md:justify-between mb-5'>
         <Search onSearch={setSearchTerm} />
-        <Button
-          icon={<PlusCircle />}
-          onClick={() => handleOpenAssetForm({ ...defaultAssetData, branchId: selectedBranchId })}
-        >
-          Agregar un nuevo activo
-        </Button>
+        {
+          isAdmin &&
+          <Button
+            icon={<PlusCircle />}
+            onClick={() => handleOpenAssetForm({ ...defaultAssetData, branchId: selectedBranchId })}
+          >
+            Agregar un nuevo activo
+          </Button>
+        }
       </div>
       <TabsContainer tabs={tabs} />
       <ModalForm isOpen={isOpenAssetForm} onClose={handleCloseAssetForm}>
         <FormAsset onSubmit={handleSubmitAsset} initialData={editingAsset} />
       </ModalForm>
+
     </>
   )
 }

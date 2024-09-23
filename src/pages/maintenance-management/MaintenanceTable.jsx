@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react'
 import Chip from '../../components/common/Chip'
 import { defaultWorkOrderData } from '../../utils/objects/workOrder'
+import { useRecoilValue } from 'recoil'
+import { userState } from '../../state/userAtom'
 
-export default function MaintenanceTable({ workOrders = [] }) {
+export default function MaintenanceTable({ workOrders = [], openReportForm }) {
+  const user = useRecoilValue(userState)
+
+  const isTechnical = user.roles.some(role => role === 'Técnico de Mantenimiento')
+
   const [dataWorkOrders, setDataWorkOrders] = useState([defaultWorkOrderData])
   useEffect(() => {
     const transformedWorkOrders = workOrders.map(workOrder => ({
@@ -20,6 +26,10 @@ export default function MaintenanceTable({ workOrders = [] }) {
     }))
     setDataWorkOrders(transformedWorkOrders)
   }, [workOrders])
+
+  const handleOpenReportForm = (item = null) => {
+    openReportForm(item)
+  }
 
   const colums = [
     { title: 'Tipo de mantenimiento', value: 'type' },
@@ -50,11 +60,12 @@ export default function MaintenanceTable({ workOrders = [] }) {
               <tr
                 className='border-b border-gray-400 hover:bg-gray-100'
                 key={item.id}
+                onClick={() => handleOpenReportForm(item)}
               >
                 {
                   colums.map(column => (
                     <td
-                      className='px-6 py-4'
+                      className={`px-6 py-4 ${isTechnical ? user.id === item.userId ? 'text-black' : 'text-gray-400' : 'text-black'}`}
                       key={column.value}
                     >
                       {item[column.value]}

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { removeCircularReferences } from '../../utils/fix'
+import { defaultAssetData } from '../../utils/objects/asset'
 
 const API_ADDRESS = `${import.meta.env.VITE_JSON_SERVER}/assets`
 
@@ -19,7 +20,7 @@ export const getAssetById = async (id) => {
     return response.data
   } catch (error) {
     console.error(error)
-    return []
+    return defaultAssetData
   }
 }
 

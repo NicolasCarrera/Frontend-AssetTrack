@@ -6,7 +6,8 @@ export const defaultCompanyData = {
   email: '',
   industry: '',
   employees: 0,
-  assets: 0
+  assets: 0,
+  userId: null
 }
 
 export function createCompany(data = {}) {

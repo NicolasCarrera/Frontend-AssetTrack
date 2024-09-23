@@ -4,12 +4,11 @@ export const defaultUserData = {
   lastName: '',
   email: '',
   phone: '',
-  document: [
-    {
-      type: '',
-      value: ''
-    }
-  ],
+  document: {
+    type: '',
+    value: ''
+  },
+  password: '',
   status: '',
   roles: []
 }

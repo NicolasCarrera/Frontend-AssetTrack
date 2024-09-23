@@ -1,20 +1,11 @@
-import { useEffect, useState } from 'react'
-import { jwtDecode } from 'jwt-decode'
-
-export default function useDecodeJWT(token) {
-  const [decodedToken, setDecodedToken] = useState(null)
-
-  useEffect(() => {
-    if (token) {
-      try {
-        const decoded = jwtDecode(token)
-        setDecodedToken(decoded)
-      } catch (error) {
-        console.error('Invalid token', error)
-        setDecodedToken(null)
-      }
+export default function useDecodeJWT() {
+  const decodeToken = (token) => {
+    try {
+      return JSON.parse(atob(token));
+    } catch (error) {
+      console.error('Error al decodificar el token:', error);
+      throw new Error('Token inválido');
     }
-  }, [token])
-
-  return decodedToken
+  }
+  return { decodeToken }
 }

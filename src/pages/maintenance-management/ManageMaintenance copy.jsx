@@ -10,28 +10,18 @@ import { getCustomerById } from '../../services/customer-branches-service/custom
 import { getBranchById } from '../../services/customer-branches-service/branch'
 import { getAssetById, updateAsset } from '../../services/customer-assets-service/asset'
 import { defaultWorkOrderData } from '../../utils/objects/workOrder'
-import { cleateWorkOrder, deleteWorkOrder, getWorkOrdersByAssetId, updateWorkOrder } from '../../services/work-order-maintenance-service/workOrders'
+import { cleateWorkOrder, getWorkOrdersByAssetId, updateWorkOrder } from '../../services/work-order-maintenance-service/workOrders'
 import { defaultReportData } from '../../utils/objects/report'
-import { cleateReport, getReportsByAssetId } from '../../services/work-order-maintenance-service/reports'
+import { getReportsByAssetId } from '../../services/work-order-maintenance-service/reports'
 import Button from '../../components/common/Button'
 import PlusCircle from '../../assets/icons/PlusCircle'
 import ModalForm from '../../components/common/ModalForm'
 import FormWorkOrder from './FormWorkOrder'
 import FormCorrectiveMaintenance from '../work-order-management/FormCorrectiveMaintenance'
 import FormPreventiveMaintenance from '../work-order-management/FormPreventiveMaintenance'
-import { cleatePreventiveReport } from '../../services/work-order-maintenance-service/preventiveReport'
-import { cleateCorrectiveReport } from '../../services/work-order-maintenance-service/correctiveReport'
-import { userState } from '../../state/userAtom'
-import { useRecoilValue } from 'recoil'
-import Alert from '../../components/common/Alert'
 
 export default function ManageMaintenance() {
   const { customerId, branchId, assetId } = useParams()
-
-  const user = useRecoilValue(userState)
-
-  const isAdmin = user.roles.some(role => role === 'Gerente de Mantenimiento')
-  const isTechnical = user.roles.some(role => role === 'Técnico de Mantenimiento')
 
   const [dataCompany, setDataCompany] = useState(defaultCompanyData)
   const [dataBranch, setDataBranch] = useState(defaultBranchData)
@@ -40,12 +30,7 @@ export default function ManageMaintenance() {
   const [dataReports, setDataReports] = useState([defaultReportData])
 
   const [isOpenWorkOrderForm, setIsOpenWorkOrderForm] = useState(false)
-  const [isOpenPreventiveReportForm, setIsOpenPreventiveReportForm] = useState(false)
-  const [isOpenCorrectiveReportForm, setIsOpenCorrectiveReportForm] = useState(false)
-
   const [editingWorkOrder, setEditingWorkOrder] = useState(null)
-
-  const [alertModal, setAlertModal] = useState({ title: '', message: [] })
 
   useEffect(() => {
     const fetchData = async () => {
@@ -103,75 +88,6 @@ export default function ManageMaintenance() {
     }
   }
 
-  const handleOpenReportForm = (item = null) => {
-    const workOrder = dataWorkOrders.find(wo => wo.id === item.id ? wo : null)
-    setEditingWorkOrder(workOrder)
-    if (isAdmin) {
-      if (workOrder.type === 'PREVENTIVO') {
-        setEditingWorkOrder(workOrder)
-        setIsOpenPreventiveReportForm(true)
-      } else if (workOrder.type === 'CORRECTIVO') {
-        setEditingWorkOrder(workOrder)
-        setIsOpenCorrectiveReportForm(true)
-      }
-    }
-    if (isTechnical) {
-      if (item.userId === user.id) {
-        if (workOrder.type === 'PREVENTIVO') {
-          setEditingWorkOrder(workOrder)
-          setIsOpenPreventiveReportForm(true)
-        } else if (workOrder.type === 'CORRECTIVO') {
-          setEditingWorkOrder(workOrder)
-          setIsOpenCorrectiveReportForm(true)
-        }
-      } else {
-        setAlertModal({ title: 'No tiene permisos para realizar esta tarea ', message: ['Esta tarea esta reservada para para otro técnico o no se le asignado un tenido', 'Comuníquese con su Gerente de Mantenimiento para que le asigne esta tarea'] })
-      }
-    }
-  }
-
-  const handleCloseReportForm = () => {
-    setIsOpenPreventiveReportForm(false)
-    setIsOpenCorrectiveReportForm(false)
-  }
-
-  const handleSubmitReport = async (workOrder) => {
-    const { type, date, userId, assetId } = workOrder
-    const report = {
-      ...defaultReportData,
-      type: type,
-      date: date,
-      userId: userId,
-      assetId: assetId
-    }
-    const newReport = await cleateReport(report)
-    return newReport
-  }
-
-  const handleSubmitPreventiveReport = async (formData) => {
-    const newReport = await handleSubmitReport(editingWorkOrder)
-    await cleatePreventiveReport({ ...formData, reportId: newReport.id })
-    await handleDeleteWorkOrder(editingWorkOrder.id)
-    setDataWorkOrders(...dataWorkOrders)
-    const asset = await getAssetById(editingWorkOrder.assetId)
-    await updateAsset(editingWorkOrder.assetId, { ...asset, maintenance: { ...asset.maintenance, last: newReport.date } })
-    handleCloseReportForm()
-  }
-
-  const handleSubmitCorrectiveReport = async (formData) => {
-    const newReport = await handleSubmitReport(editingWorkOrder)
-    await cleateCorrectiveReport({ ...formData, reportId: newReport.id })
-    await handleDeleteWorkOrder(editingWorkOrder.id)
-    const asset = await getAssetById(editingWorkOrder.assetId)
-    await updateAsset(editingWorkOrder.assetId, { ...asset, maintenance: { ...asset.maintenance, last: newReport.date } })
-    handleCloseReportForm()
-  }
-
-  const handleDeleteWorkOrder = async (id) => {
-    await deleteWorkOrder(id)
-    setDataWorkOrders(dataWorkOrders.filter(workOrder => workOrder.id != id))
-  }
-
   const getClosestDate = (date1, date2) => {
     const d1 = new Date(date1)
     const d2 = new Date(date2)
@@ -187,7 +103,7 @@ export default function ManageMaintenance() {
   }
 
   const tabs = [
-    { id: 1, title: 'Mantenimientos programados', content: <MaintenanceTable workOrders={dataWorkOrders} openReportForm={handleOpenReportForm} /> },
+    { id: 1, title: 'Mantenimientos programados', content: <MaintenanceTable workOrders={dataWorkOrders} /> },
     { id: 2, title: 'Historial de mantenimiento', content: <HistoryTable reports={dataReports} /> }
   ]
 
@@ -196,7 +112,6 @@ export default function ManageMaintenance() {
       <h1 className='text-3xl font-bold mb-10'>
         Gestión de Mantenimiento
       </h1>
-      <Alert title={alertModal.title} message={alertModal.message} />
       <div className='flex justify-between gap-4'>
 
         <table className='text-left'>
@@ -238,12 +153,6 @@ export default function ManageMaintenance() {
         <FormWorkOrder onSubmit={handleSubmitWorkOrder} initialData={editingWorkOrder} />
       </ModalForm>
 
-      <ModalForm isOpen={isOpenCorrectiveReportForm} onClose={handleCloseReportForm} >
-        <FormCorrectiveMaintenance onSubmit={handleSubmitCorrectiveReport} workOrder={editingWorkOrder} />
-      </ModalForm >
-      <ModalForm isOpen={isOpenPreventiveReportForm} onClose={handleCloseReportForm} >
-        <FormPreventiveMaintenance onSubmit={handleSubmitPreventiveReport} workOrder={editingWorkOrder} />
-      </ModalForm >
     </>
   )
 }

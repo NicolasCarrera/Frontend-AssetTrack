@@ -4,12 +4,15 @@
 import { RecoilRoot } from 'recoil'
 import { BrowserRouter } from 'react-router-dom'
 import AppRoutes from './routes/AppRoutes'
+import AuthProvider from './components/authentication/AuthProvider'
 
 function App() {
   return (
     <RecoilRoot>
       <BrowserRouter>
-        <AppRoutes />
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
       </BrowserRouter>
     </RecoilRoot>
   )

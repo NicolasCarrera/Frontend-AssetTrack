@@ -8,36 +8,20 @@ import Search from '../../components/common/Search'
 import { useEffect } from 'react'
 import ChevronLeft from '../../assets/icons/ChevronLeft'
 import ChevronRight from '../../assets/icons/ChevronRight'
-import { deleteUsers, getAllUsers, getUserById } from '../../services/user-role-management-service/users'
+import { createUser, deleteUsers, getAllUsers, getUserByFilter, getUserById, updateUser } from '../../services/user-role-management-service/users'
 import FormUser from './FormUser'
 import Alert from '../../components/common/Alert'
-import { useRecoilState } from 'recoil'
-import { alertUserManagementPage } from '../../state/alertMessagesAtom'
-
-// TODO: Añadir funcion de busqueda
-// TODO: Añadir mas parametros a la tabla
-// TODO: Coregir los diseños
-const initialUserData = {
-  id: null,
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  document: [
-    {
-      type: '',
-      value: ''
-    }
-  ],
-  status: '',
-  roles: []
-}
+import ModalForm from '../../components/common/ModalForm'
 
 export default function ManageUser() {
 
-  const [alertModal, setAlertModal] = useRecoilState(alertUserManagementPage)
+  const [alertModal, setAlertModal] = useState({ title: '', message: [] })
 
-  const [data, setData] = useState([])
+  const [dataUsers, setDataUsers] = useState([])
+  const [isOpenForm, setIsOpenForm] = useState(false)
+  const [editingUser, setEditingUser] = useState(null)
+
+  const [searchTerm, setSearchTerm] = useState('')
 
   const [page, setPage] = useState(0)
   const [size, setSize] = useState(5)
@@ -46,23 +30,60 @@ export default function ManageUser() {
 
   const [totalElements, setTotalElements] = useState(0)
 
-  const [isOpenForm, setIsOpenForm] = useState(false)
+  useEffect(() => {
+    const fetchDataUsers = async () => {
+      const newDataUsers = await getAllUsers()
+      setDataUsers(
+        newDataUsers.map(user => refactorUserData(user))
+      )
+    }
+    fetchDataUsers()
+  }, [])
 
-  const [user, setUser] = useState(initialUserData)
+  useEffect(() => {
+    const fetchDataUsers = async () => {
+      const newDataUsers = await getUserByFilter(searchTerm)
+      setDataUsers(newDataUsers)
+    }
+    fetchDataUsers()
+  }, [searchTerm])
 
-  const openAddScreen = () => {
-    setUser(initialUserData)
-    toggleForm()
+  const handleOpenForm = (item = null) => {
+    setEditingUser(item)
+    setIsOpenForm(true)
   }
 
-  const openEditScreen = async (id) => {
-    const userData = await getUserById(id)
-    setUser(userData)
-    toggleForm()
+  const handleCloseForm = () => {
+    setIsOpenForm(false)
+    setEditingUser(null)
   }
 
-  const toggleForm = () => {
-    setIsOpenForm(!isOpenForm)
+  const handleSubmitUser = async (formData) => {
+    if (editingUser) {
+      const updatedUserData = await updateUser(editingUser.id, formData)
+      setDataUsers(dataUsers.map(user => user.id === editingUser.id ? refactorUserData(updatedUserData) : user))
+      handleCloseForm()
+      setAlertModal({ title: 'Usuario actualizado', message: ['Los datos del usuario se han actualizado'] })
+    } else {
+      const newUserData = await createUser(formData)
+      setDataUsers([...dataUsers, refactorUserData(newUserData)])
+      handleCloseForm()
+      setAlertModal({ title: 'Usuario ingresado', message: ['El usuario a sido registrado exitosamente'] })
+    }
+  }
+
+  const handleDeleteUser = async (id) => {
+    await deleteUsers(id)
+    setDataUsers(dataUsers.filter(user => user.id != id))
+    setAlertModal({ title: 'Esuario eliminado ', message: ['Los datos del usuario han sido eliminados'] })
+  }
+
+  const refactorUserData = (user) => {
+    return {
+      ...user,
+      status: <Chip variant={user.status === 'ACTIVE' ? 'green' : 'grey'}>{user.status}</Chip>,
+      roles: user.roles ? user.roles.join(', ') : ''
+    }
   }
 
   const colums = [
@@ -71,21 +92,22 @@ export default function ManageUser() {
     { title: 'Estado', value: 'status' }
   ]
 
-  const handleUserPage = async (page, size) => {
-    const data = await getAllUsers(page, size)
-    const newUserData = data.map(user => ({
-      ...user,
-      status: <Chip variant='green'>{user.status}</Chip>,
-      roles: user.roles ? user.roles.map(role => role).join(', ') : ''
-    }))
-    setData(newUserData)
-    //setTotalPages(data.page.totalPages)
-    //setTotalElements(data.page.totalElements)
-  }
+  // const handleUserPage = async (page, size) => {
+  //   const data = await getAllUsers(page, size)
+  //   const newUserData = data.map(user => ({
+  //     ...user,
+  //     status: <Chip variant='green'>{user.status}</Chip>,
+  //     roles: user.roles ? user.roles.map(role => role).join(', ') : ''
+  //   }))
+  //   setDataUsers(newUserData)
+  //   setTotalPages(data.page.totalPages)
+  //   setTotalElements(data.page.totalElements)
+  // }
 
-  useEffect(() => {
-    handleUserPage(page, size)
-  }, [page, size])
+  // useEffect(() => {
+  //   handleUserPage(page, size)
+  // }, [page, size])
+
 
   return (
     <>
@@ -94,10 +116,10 @@ export default function ManageUser() {
       </h1>
       <Alert title={alertModal.title} message={alertModal.message} />
       <div className='flex flex-col-reverse gap-4 md:flex-row md:justify-between mb-5'>
-        <Search />
+        <Search onSearch={setSearchTerm} />
         <Button
           icon={<PlusCircle />}
-          onClick={openAddScreen}
+          onClick={handleOpenForm}
         >
           Agregar un nuevo usuario
         </Button>
@@ -123,7 +145,7 @@ export default function ManageUser() {
         </thead>
         <tbody>
           {
-            data.map(item => (
+            dataUsers.map(item => (
               <tr
                 className='border-b border-gray-400'
                 key={item.id}
@@ -141,10 +163,14 @@ export default function ManageUser() {
                   ))
                 }
                 <td key='actions'>
-                  <button onClick={() => openEditScreen(item.id)}>
+                  <button onClick={async () => {
+                    const user = await getUserById(item.id)
+                    handleOpenForm(user)
+                  }}
+                  >
                     <Pencil />
                   </button>
-                  <button onClick={() => deleteUsers(item.id)}>
+                  <button onClick={() => handleDeleteUser(item.id)}>
                     <Trash />
                   </button>
                 </td>
@@ -188,8 +214,9 @@ export default function ManageUser() {
           </button>
         </div>
       </div>
-
-      <FormUser isOpen={isOpenForm} onClose={toggleForm} data={user} />
+      <ModalForm isOpen={isOpenForm} onClose={handleCloseForm} >
+        <FormUser onSubmit={handleSubmitUser} initialData={editingUser} />
+      </ModalForm>
     </>
   )
 }

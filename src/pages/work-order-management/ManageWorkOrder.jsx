@@ -1,41 +1,34 @@
 import { useEffect, useState } from 'react'
-import Search from '../../components/common/Search'
 import SearchTechnician from './SearchTechnician'
 import { defaultWorkOrderData } from '../../utils/objects/workOrder'
-import { getAllWorkOrders, updateWorkOrder } from '../../services/work-order-maintenance-service/workOrders'
-import { getAssetById } from '../../services/customer-assets-service/asset'
-import { getBranchById } from '../../services/customer-branches-service/branch'
-import { getCustomerById } from '../../services/customer-branches-service/customer'
-import { getUserById } from '../../services/user-role-management-service/users'
+import { getAllWorkOrders, getWorkOrdersByUserId, updateWorkOrder } from '../../services/work-order-maintenance-service/workOrders'
+import WorkOrderTable from './WorkOrderTable'
+import { useNavigate } from 'react-router-dom'
+import { useRecoilValue } from 'recoil'
+import { userState } from '../../state/userAtom'
 
 export default function ManageWorkOrder() {
+  const navigate = useNavigate()
+
+  const user = useRecoilValue(userState)
+
+  const isTechnical = user.roles.some(role => role === 'Técnico de Mantenimiento')
+
   const [dataWorkOrders, setDataWorkOrders] = useState([defaultWorkOrderData])
+
   const [isOpenSearchTechnican, setIsOpenSearchTechnican] = useState(false)
+
   const [editingWorkOrder, setEditingWorkOrder] = useState(null)
 
   useEffect(() => {
     const fetchWorkOrdersData = async () => {
-      const workOrders = await getAllWorkOrders()
-
-      const updatedData = await Promise.all(workOrders.map(async (workOrder) => {
-        const userData = await getUserById(workOrder.userId)
-        const assetData = await getAssetById(workOrder.assetId)
-        const branchData = await getBranchById(assetData.branchId)
-        const clientData = await getCustomerById(branchData.companyId)
-
-        return {
-          ...workOrder,
-          company: clientData?.name,
-          branch: branchData?.name,
-          asset: assetData.name,
-          technician:
-            <button onClick={() => handleOpenSearchTechnican(workOrder)}>
-              <span className='text-sm underline text-sky-500 hover:text-sky-800'>{workOrder.userId ? `${userData.firstName} ${userData.lastName}` : 'Asignar técnico'}</span>
-            </button>
-        }
-      }))
-
-      setDataWorkOrders(updatedData)
+      if (isTechnical) {
+        const workOrders = await getWorkOrdersByUserId(user.id)
+        setDataWorkOrders(workOrders)
+      } else {
+        const workOrders = await getAllWorkOrders()
+        setDataWorkOrders(workOrders)
+      }
     }
     fetchWorkOrdersData()
   }, [])
@@ -53,7 +46,6 @@ export default function ManageWorkOrder() {
           </button>
       } : workOrder
     ))
-
     handleCloseSearchTechnican()
   }
 
@@ -62,66 +54,24 @@ export default function ManageWorkOrder() {
     setIsOpenSearchTechnican(true)
   }
 
+  const handleOpenReportForm = (item = null) => {
+    navigate(`/customers/${item.companyId}/branches/${item.branchId}/asset/${item.assetId}`)
+  }
+
   const handleCloseSearchTechnican = () => {
     setIsOpenSearchTechnican(false)
     setEditingWorkOrder(null)
   }
 
-  const colums = [
-    { title: 'Tipo de mantenimiento', value: 'type' },
-    { title: 'Fecha programada', value: 'date' },
-    { title: 'Empresa', value: 'company' },
-    { title: 'Sucursal', value: 'branch' },
-    { title: 'Activo', value: 'asset' },
-    { title: 'Técnico', value: 'technician' }
-  ]
-
   return (
     <>
       <h1 className='text-3xl font-bold mb-10'>
-        Ordenes de trabajo
+        Órdenes de trabajo
       </h1>
-      {/* <div className='mb-5'>
-        <Search />
-      </div> */}
-      <table className='w-full'>
-        <thead className='bg-[#0F0E17] text-[#FFFFFE]'>
-          <tr>
-            {
-              colums.map(column => (
-                <th
-                  className='py-4'
-                  key={column.value}
-                >
-                  {column.title}
-                </th>
-              ))
-            }
-          </tr>
-        </thead>
-        <tbody>
-          {
-            dataWorkOrders.map(item => (
-              <tr
-                className='border-b border-gray-400 hover:bg-gray-100'
-                key={item.id}
-              >
-                {
-                  colums.map(column => (
-                    <td
-                      className='px-6 py-4'
-                      key={column.value}
-                    >
-                      {item[column.value]}
-                    </td>
-                  ))
-                }
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
+      <WorkOrderTable workOrders={dataWorkOrders} openSearchTechnican={handleOpenSearchTechnican} openReportForm={handleOpenReportForm} />
+
       <SearchTechnician isOpen={isOpenSearchTechnican} onClose={handleCloseSearchTechnican} onClick={handleSelectTechnician} />
+
     </>
   )
 }

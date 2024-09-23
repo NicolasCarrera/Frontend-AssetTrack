@@ -1,16 +1,29 @@
 import axios from 'axios'
 import { removeCircularReferences } from '../../utils/fix'
+import { defaultUserData } from '../../utils/objects/user'
 
 const API_ADDRESS = import.meta.env.VITE_JSON_SERVER
 
 export const loginUser = async (identification, password) => {
-  return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+  try {
+    const response = await axios.get(`${API_ADDRESS}/users`)
+    const users = response.data
+    const user = users.find(u => (u.email === identification || u.document.value === identification) && u.password === password)
+    if (user) {
+      const token = btoa(JSON.stringify({ ...user, password: undefined }))
+      return token
+    } else {
+      throw new Error('Credenciales inválidas')
+    }
+  } catch (error) {
+    console.error('Error en el login:', error)
+    throw error
+  }
 }
 
-export const signupUser = async (userData) => {
+export const createUser = async (userData) => {
   const cleanedData = removeCircularReferences(userData)
   const response = await axios.post(`${API_ADDRESS}/users`, cleanedData)
-  console.log('Usuario creado:', response.data)
   return response.data
 }
 
@@ -31,11 +44,26 @@ export const deleteUsers = async (id) => {
 }
 
 export const getUserById = async (id) => {
-  const response = await axios.get(`${API_ADDRESS}/users/${id}`)
-  return response.data
+  try {
+    const response = await axios.get(`${API_ADDRESS}/users/${id}`)
+    return response.data
+  } catch (error) {
+    console.error(error);
+    return defaultUserData
+  }
 }
 
 export const getUserByRole = async (role) => {
   const response = await axios.get(`${API_ADDRESS}/users?roles=${role}`)
   return response.data
+}
+
+export const getUserByFilter = async (filter) => {
+  try {
+    const response = await axios.get(`${API_ADDRESS}/users?q=${filter}`)
+    return response.data
+  } catch (error) {
+    console.error(error)
+    return []
+  }
 }

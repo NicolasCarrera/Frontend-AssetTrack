@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loginUser } from '../../services/user-role-management-service/users'
 import useDecodeJWT from '../../hooks/useDecodeJWT'
@@ -8,10 +8,11 @@ import useAuth from '../../hooks/useAuth'
 export default function Login() {
   const navigate = useNavigate()
 
-  const [token, setToken] = useState(null)
   const [error, setError] = useState({ title: '', message: [] })
 
-  const { login, logout } = useAuth()
+  const { login } = useAuth()
+
+  const { decodeToken } = useDecodeJWT()
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -20,27 +21,17 @@ export default function Login() {
 
     try {
       const fetchedToken = await loginUser(identification, password)
-      setToken(fetchedToken)
-      setError({ title: '', message: [] })
+      if (fetchedToken) {
+        const decodedToken = decodeToken(fetchedToken)
+        login(decodedToken)
+        setError({ title: '', message: [] })
+        navigate('/welcome')
+      }
     } catch (error) {
       console.error('Failed to fetch token:', error)
       setError({ title: 'Error al iniciar sesión', message: ['Inténtalo de nuevo.'] })
-      setToken(null)
     }
   }
-
-  const decodedToken = useDecodeJWT(token)
-
-  useEffect(() => {
-    if (decodedToken) {
-      login(decodedToken)
-      navigate('/welcome')
-    }
-  }, [decodedToken])
-
-  useEffect(() => {
-    logout()
-  }, [])
 
   return (
     <div className='bg-[#0F0E17] min-h-screen flex items-center justify-center'>
