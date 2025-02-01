@@ -21,21 +21,21 @@ export default function AssetCard({ asset = defaultAssetData, onClick }) {
         <div className='flex flex-col'>
           <strong>Numero de serie</strong>
           <span>{asset.serial}</span>
-          <strong>Categoría</strong>
-          <span>{asset.category}</span>
           <strong>Marca</strong>
           <span>{asset.brand}</span>
+          <strong>Modelo</strong>
+          <span>{asset.model}</span>
         </div>
         <div className='flex flex-col'>
           <strong>Ultimo mantenimiento</strong>
           <span>
             {
-              asset.maintenance.last ? asset.maintenance.last : '--/--/----'
+              asset.maintenance?.last ? asset.maintenance.last : '--/--/----'
             }
           </span>
           <strong>Próximo mantenimiento</strong>
           <span>{
-            asset.maintenance.next ? asset.maintenance.next : '--/--/----'
+            asset.maintenance?.next ? asset.maintenance.next : '--/--/----'
           }
           </span>
         </div>

@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { removeCircularReferences } from '../../utils/fix'
-import { defaultCompanyData } from '../../utils/objects/company'
 import { defaultCorrectiveReportData } from '../../utils/objects/correctiveReport'
 
 const API_ADDRESS = `${import.meta.env.VITE_JSON_SERVER}/correctiveReport`

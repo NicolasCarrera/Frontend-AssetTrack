@@ -1,26 +1,25 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import Search from '../../components/common/Search'
 import Button from '../../components/common/Button'
 import PlusCircle from '../../assets/icons/PlusCircle'
 import TabsContainer from '../../components/tab/TabsContainer'
 import AssetsContainer from './AssetsContainer'
-import { getBranchesByClient } from '../../services/customer-branches-service/customerBranches'
 import { defaultCompanyData } from '../../utils/objects/company'
 import { defaultBranchData } from '../../utils/objects/branch'
 import ModalForm from '../../components/common/ModalForm'
 import FormAsset from './FormAsset'
 import { defaultAssetData } from '../../utils/objects/asset'
-import { createAsset, deleteAsset, getAllAssetsByBranchId, getAllAssetsUnderMaintenanceByBranchId, getAssetsByFilter, updateAsset } from '../../services/customer-assets-service/asset'
+import { createAsset, getAllAssetsByBranchId, getAllAssetsUnderMaintenanceByBranchId, updateAsset } from '../../services/customer-assets-service/asset'
 import { useRecoilValue } from 'recoil'
 import { userState } from '../../state/userAtom'
+import { getCustomerById } from '../../services/customer-branches-service/customer'
 
 export default function ManageAsset() {
   const location = useLocation()
 
   const user = useRecoilValue(userState)
 
-  const isAdmin = user.roles.some(role => role === 'Gerente de Mantenimiento')
+  const isAdmin = user.roles.name === 'Gerente de Mantenimiento'
 
   const { customerId } = useParams()
   const { branchId } = location.state || {}
@@ -28,7 +27,7 @@ export default function ManageAsset() {
   const [dataCompany, setDataCompany] = useState(defaultCompanyData)
   const [dataBranches, setDataBranches] = useState([defaultBranchData])
 
-  const [dataAssets, setDataAssets] = useState([defaultAssetData])
+  const [dataAssets, setDataAssets] = useState([]) //defaultAssetData
   const [dataAssetMaintenance, setDataAssetMaintenance] = useState([defaultAssetData])
 
   const [selectedBranchId, setSelectedBranchId] = useState(Number(branchId))
@@ -38,12 +37,10 @@ export default function ManageAsset() {
 
   const [editingAsset, setEditingAsset] = useState(null)
 
-  const [searchTerm, setSearchTerm] = useState('')
-
   useEffect(() => {
     const fetchDataCompany = async () => {
       if (Number(customerId)) {
-        const data = await getBranchesByClient(customerId)
+        const data = await getCustomerById(customerId)
         setDataCompany({ ...defaultCompanyData, ...data })
         if (data.branches.length > 0) {
           setDataBranches(data.branches)
@@ -60,18 +57,6 @@ export default function ManageAsset() {
     }
     fetchDataCompany()
   }, [])
-
-  useEffect(() => {
-    const fetchDataAssetsBySearch = async () => {
-      const newDataAssets = await getAssetsByFilter(selectedBranchId, searchTerm)
-      setDataAssets(newDataAssets)
-      const assetsFiltrados = newDataAssets.filter(asset =>
-        asset.maintenance && asset.maintenance.next !== ''
-      )
-      setDataAssetMaintenance(assetsFiltrados)
-    }
-    fetchDataAssetsBySearch()
-  }, [searchTerm])
 
   const fetchDataAssets = async (branchId) => {
     const newDataAssets = await getAllAssetsByBranchId(branchId)
@@ -104,15 +89,12 @@ export default function ManageAsset() {
       setDataAssets(dataAssets.map(asset => asset.id === editingAsset.id ? updatedAssetData : asset))
       handleCloseAssetForm()
     } else {
+      formData.companyId = Number(customerId)
+      formData.branchId = Number(selectedBranchId)
       const newAssetData = await createAsset(formData)
       setDataAssets([...dataAssets, newAssetData])
       handleCloseAssetForm()
     }
-  }
-
-  const handleDeleteAsset = async (id) => {
-    await deleteAsset(id)
-    setDataAssets(dataAssets.filter(company => company.id !== id))
   }
 
   const tabs = [
@@ -156,7 +138,7 @@ export default function ManageAsset() {
           </tr>
           <tr>
             <th className='py-2'>Dirección:</th>
-            <td className='pl-6 py-2'>{selectedDataBranch?.address}</td>
+            <td className='pl-6 py-2'>{selectedDataBranch?.location}</td>
           </tr>
           <tr>
             <th className='py-2'>Teléfono:</th>
@@ -172,7 +154,6 @@ export default function ManageAsset() {
         Activos
       </h2>
       <div className='flex flex-col-reverse gap-4 md:flex-row md:justify-between mb-5'>
-        <Search onSearch={setSearchTerm} />
         {
           isAdmin &&
           <Button

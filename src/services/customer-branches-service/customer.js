@@ -2,12 +2,12 @@ import axios from 'axios'
 import { removeCircularReferences } from '../../utils/fix'
 import { defaultCompanyData } from '../../utils/objects/company'
 
-const API_ADDRESS = `${import.meta.env.VITE_JSON_SERVER}/companies`
+const API_ADDRESS = `${import.meta.env.VITE_API_ADDRESS}/api/v1/customers`
 
 export const getAllCustomers = async () => {
   try {
-    const response = await axios.get(`${API_ADDRESS}`)
-    return response.data
+    const response = await axios.get(`${API_ADDRESS}/companies`)
+    return response.data.content
   } catch (error) {
     console.error(error)
     return []
@@ -16,7 +16,7 @@ export const getAllCustomers = async () => {
 
 export const getCustomerById = async (id) => {
   try {
-    const response = await axios.get(`${API_ADDRESS}/${id}`)
+    const response = await axios.get(`${API_ADDRESS}/companies/${id}`)
     return response.data
   } catch (error) {
     console.error(error)
@@ -27,7 +27,7 @@ export const getCustomerById = async (id) => {
 export const createCustomer = async (customerData) => {
   try {
     const cleanedData = removeCircularReferences(customerData)
-    const response = await axios.post(`${API_ADDRESS}`, cleanedData)
+    const response = await axios.post(`${API_ADDRESS}/companies`, cleanedData)
     return response.data
   } catch (error) {
     console.error(error)
@@ -37,7 +37,7 @@ export const createCustomer = async (customerData) => {
 export const updateCustomer = async (id, customerData) => {
   try {
     const cleanedData = removeCircularReferences(customerData)
-    const response = await axios.put(`${API_ADDRESS}/${id}`, cleanedData)
+    const response = await axios.put(`${API_ADDRESS}/companies/${id}`, cleanedData)
     return response.data
   } catch (error) {
     console.error(error)
@@ -46,7 +46,7 @@ export const updateCustomer = async (id, customerData) => {
 
 export const deleteCustomer = async (id) => {
   try {
-    const response = await axios.delete(`${API_ADDRESS}/${id}`)
+    const response = await axios.delete(`${API_ADDRESS}/companies/${id}`)
     return response.data
   } catch (error) {
     console.error(error)
@@ -55,8 +55,8 @@ export const deleteCustomer = async (id) => {
 
 export const getCustomersByName = async (name) => {
   try {
-    const response = await axios.get(`${API_ADDRESS}?name_like=${name}`)
-    return response.data
+    const response = await axios.get(`${API_ADDRESS}/companies/name?name=${name}`)
+    return response.data.content
   } catch (error) {
     console.error(error)
   }
@@ -64,7 +64,7 @@ export const getCustomersByName = async (name) => {
 
 export const getCustomerByUserId = async (userId) => {
   try {
-    const response = await axios.get(`${API_ADDRESS}?userId=${userId}`)
+    const response = await axios.get(`${API_ADDRESS}/companies/user/${userId}`)
     return response.data[0]
   } catch (error) {
     console.error(error)

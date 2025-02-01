@@ -23,4 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
+# Test database
 db.json
+
+# Environment variables
+.env

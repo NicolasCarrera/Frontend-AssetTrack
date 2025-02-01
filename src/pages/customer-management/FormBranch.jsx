@@ -47,8 +47,8 @@ export default function FormBranch({ onSubmit, initialData = null }) {
           <input
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
             type='text'
-            value={formData.address}
-            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            value={formData.location}
+            onChange={(e) => setFormData({ ...formData, location: e.target.value })} // TODO: Cambiar addres por location
             readOnly={!isEditable}
             required
           />
@@ -74,6 +74,20 @@ export default function FormBranch({ onSubmit, initialData = null }) {
             readOnly={!isEditable}
             required
           />
+        </label>
+        <label className='block'>
+          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Estado</span>
+          <select
+            className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            readOnly={!isEditable}
+            required
+          >
+            <option value=''>Seleccione el estado</option>
+            <option value='ACTIVE'>Activo</option>
+            <option value='INACTIVE'>Inactivo</option>
+          </select>
         </label>
       </fieldset>
       <button

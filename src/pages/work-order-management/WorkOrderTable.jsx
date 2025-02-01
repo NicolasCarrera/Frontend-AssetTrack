@@ -9,7 +9,7 @@ import { userState } from "../../state/userAtom"
 export default function WorkOrderTable({ workOrders = [], openSearchTechnican, openReportForm }) {
   const user = useRecoilValue(userState)
 
-  const isAdmin = user.roles.some(role => role === 'Gerente de Mantenimiento')
+  const isAdmin = user.roles.name === 'Gerente de Mantenimiento'
 
   const [dataWorkOrder, setDataWorkOrder] = useState([])
 
@@ -18,16 +18,15 @@ export default function WorkOrderTable({ workOrders = [], openSearchTechnican, o
       const refactorDataWorkOrder = await Promise.all(workOrders.map(async (workOrder) => {
         const userData = await getUserById(workOrder.userId)
         const assetData = await getAssetById(workOrder.assetId)
-        const branchData = await getBranchById(assetData.branchId)
-        const clientData = await getCustomerById(branchData.companyId)
+        const branchData = await getBranchById(workOrder.branchId)
+        const clientData = await getCustomerById(workOrder.companyId)
 
         return {
           ...workOrder,
-          companyId: clientData?.id,
           company: clientData?.name,
-          branchId: branchData?.id,
           branch: branchData?.name,
-          asset: assetData.name,
+          asset: assetData?.name,
+          type: workOrder.type === 'PREVENTIVE' ? 'Mantenimiento preventivo' : 'Mantenimiento correctivo',
           technician:
             isAdmin ?
               <button onClick={(e) => handleOpenSearchTechnican(e, workOrder)}>

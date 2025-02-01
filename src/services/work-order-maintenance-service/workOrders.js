@@ -1,12 +1,12 @@
 import axios from 'axios'
 import { removeCircularReferences } from '../../utils/fix'
 
-const API_ADDRESS = `${import.meta.env.VITE_JSON_SERVER}/work-orders`
+const API_ADDRESS = `${import.meta.env.VITE_API_ADDRESS}/api/v1/work-orders`
 
 export const getAllWorkOrders = async () => {
   try {
-    const response = await axios.get(`${API_ADDRESS}?_sort=date`)
-    return response.data
+    const response = await axios.get(`${API_ADDRESS}/`)
+    return response.data.content
   } catch (error) {
     console.error(error)
     return []
@@ -15,8 +15,8 @@ export const getAllWorkOrders = async () => {
 
 export const getWorkOrdersByAssetId = async (assetId) => {
   try {
-    const response = await axios.get(`${API_ADDRESS}?_sort=date&assetId=${assetId}`)
-    return response.data
+    const response = await axios.get(`${API_ADDRESS}/assets/${assetId}`)
+    return response.data.content
   } catch (error) {
     console.error(error)
     return []
@@ -25,8 +25,8 @@ export const getWorkOrdersByAssetId = async (assetId) => {
 
 export const getWorkOrdersByUserId = async (userId) => {
   try {
-    const response = await axios.get(`${API_ADDRESS}?_sort=date&userId=${userId}`)
-    return response.data
+    const response = await axios.get(`${API_ADDRESS}users/${userId}`)
+    return response.data.content
   } catch (error) {
     console.error(error)
     return []
@@ -35,8 +35,7 @@ export const getWorkOrdersByUserId = async (userId) => {
 
 export const cleateWorkOrder = async (workOrderData) => {
   try {
-    const cleanedData = removeCircularReferences(workOrderData)
-    const response = await axios.post(`${API_ADDRESS}`, cleanedData)
+    const response = await axios.post(`${API_ADDRESS}/`, workOrderData)
     return response.data
   } catch (error) {
     console.error(error)

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import Chip from '../../components/common/Chip'
 import { defaultWorkOrderData } from '../../utils/objects/workOrder'
 import { useRecoilValue } from 'recoil'
 import { userState } from '../../state/userAtom'
@@ -7,24 +6,11 @@ import { userState } from '../../state/userAtom'
 export default function MaintenanceTable({ workOrders = [], openReportForm }) {
   const user = useRecoilValue(userState)
 
-  const isTechnical = user.roles.some(role => role === 'Técnico de Mantenimiento')
+  const isTechnical = user.roles.name === 'Técnico de Mantenimiento'
 
   const [dataWorkOrders, setDataWorkOrders] = useState([defaultWorkOrderData])
   useEffect(() => {
-    const transformedWorkOrders = workOrders.map(workOrder => ({
-      ...workOrder,
-      status:
-        <Chip
-          variant={
-            workOrder.status === 'Pendiente' ? 'yellow' :
-              workOrder.status === 'En proceso' ? 'green' :
-                workOrder.status === 'Urgente' ? 'red' : 'grey'
-          }
-        >
-          {workOrder.status}
-        </Chip>
-    }))
-    setDataWorkOrders(transformedWorkOrders)
+    setDataWorkOrders(workOrders)
   }, [workOrders])
 
   const handleOpenReportForm = (item = null) => {
@@ -34,7 +20,6 @@ export default function MaintenanceTable({ workOrders = [], openReportForm }) {
   const colums = [
     { title: 'Tipo de mantenimiento', value: 'type' },
     { title: 'Fecha programada', value: 'date' },
-    { title: 'Estado', value: 'status' }
   ]
 
   return (

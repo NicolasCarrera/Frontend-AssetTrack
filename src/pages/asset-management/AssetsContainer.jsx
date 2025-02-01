@@ -7,6 +7,7 @@ export default function AssetsContainer({ assetData = [] }) {
   return (
     <div className='grid grid-cols-3 gap-4'>
       {
+        assetData.length > 0 &&
         assetData.map(asset => (
           <AssetCard
             key={asset.id}

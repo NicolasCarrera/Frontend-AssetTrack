@@ -12,7 +12,7 @@ export default function ManageWorkOrder() {
 
   const user = useRecoilValue(userState)
 
-  const isTechnical = user.roles.some(role => role === 'Técnico de Mantenimiento')
+  const isTechnical = user.roles.name === 'Técnico de Mantenimiento'
 
   const [dataWorkOrders, setDataWorkOrders] = useState([defaultWorkOrderData])
 

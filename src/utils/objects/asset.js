@@ -2,14 +2,16 @@ export const defaultAssetData = {
   id: null,
   name: '',
   description: '',
-  category: '',
   brand: '',
-  type: '',
-  acquisition: '',
+  model: '',
   serial: '',
+  acquisition: '',
+  location: '',
+  status: '',
+  companyId: null,
+  branchId: null,
   maintenance: {
     last: '',
     next: ''
   },
-  branchId: null
 }

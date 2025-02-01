@@ -50,7 +50,23 @@ export default function FormUser({ onSubmit, initialData = null }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    onSubmit(formData)
+    const { id, firstName, lastName, email, password, phone, documents, roles, status } = formData;
+
+    const cleanData = {
+      id,
+      firstName,
+      lastName,
+      email,
+      password,
+      phone,
+      document: {
+        document: documents.document,
+        identification: documents.identification
+      },
+      role: roles.name,
+      status,
+    };
+    await onSubmit(cleanData)
   }
 
   return (
@@ -110,7 +126,7 @@ export default function FormUser({ onSubmit, initialData = null }) {
           />
         </label>
         {
-          initialData && !initialData.password &&
+          !formData.id &&
           <label className='block'>
             <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Contraseña</span>
             <input
@@ -131,11 +147,12 @@ export default function FormUser({ onSubmit, initialData = null }) {
           <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Tipo de identificación</span>
           <select
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
-            value={formData.document?.type || 'IDENTITY_CARD'}
-            onChange={(e) => setFormData({ ...formData, document: { ...formData.document, type: e.target.value } })}
+            value={formData.documents?.document}
+            onChange={(e) => setFormData({ ...formData, documents: { ...formData.documents, document: e.target.value } })}
             readOnly={!isEditable}
             required
           >
+            <option value=''>Seleccione una identificación</option>
             {
               documentTypes.map(type => (
                 <option
@@ -155,8 +172,8 @@ export default function FormUser({ onSubmit, initialData = null }) {
           <input
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
             type='text'
-            value={formData.document?.value}
-            onChange={(e) => setFormData({ ...formData, document: { ...formData.document, value: e.target.value } })}
+            value={formData.documents?.identification}
+            onChange={(e) => setFormData({ ...formData, documents: { ...formData.documents, identification: e.target.value } })}
             readOnly={!isEditable}
             required
           />
@@ -168,11 +185,12 @@ export default function FormUser({ onSubmit, initialData = null }) {
           <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Roles</span>
           <select
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
-            value={formData.roles && formData.roles.length > 0 ? formData.roles[0] : 'Usuario'}
-            onChange={(e) => setFormData({ ...formData, roles: [e.target.value] })}
+            value={formData.roles && formData.roles.name}
+            onChange={(e) => setFormData({ ...formData, roles: { ...formData.roles, name: e.target.value } })}
             readOnly={!isEditable}
             required
           >
+            <option value=''>Seleccione un rol</option>
             {
               availableRoles.map(role => (
                 <option
@@ -191,11 +209,12 @@ export default function FormUser({ onSubmit, initialData = null }) {
           <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Estado</span>
           <select
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
-            value={formData.status || 'ACTIVE'}
+            value={formData.status}
             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
             readOnly={!isEditable}
             required
           >
+            <option value=''>Seleccione el estado</option>
             <option value='ACTIVE'>Activo</option>
             <option value='INACTIVE'>Inactivo</option>
           </select>

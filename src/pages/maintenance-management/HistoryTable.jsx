@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react'
 import { defaultReportData } from '../../utils/objects/report'
 import { getUserById } from '../../services/user-role-management-service/users'
-import { useNavigate } from 'react-router-dom'
 
 export default function HistoryTable({ reports = [] }) {
-  const navigate = useNavigate()
-
   const [dataReports, setDataReports] = useState([defaultReportData])
 
   useEffect(() => {
@@ -27,14 +24,14 @@ export default function HistoryTable({ reports = [] }) {
     fetchUserData()
   }, [reports])
 
-  const openInNewTab = (url) => {
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
-
   const handleClick = (id) => {
-    const url = `${window.location.origin}/reports/${id}`;
-    openInNewTab(url);
-  };
+    const downloadUrl = `${import.meta.env.VITE_API_ADDRESS}/api/v1/maintenance/document-report/${id}/download`
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   const colums = [
     { title: 'Tipo de mantenimiento', value: 'type' },

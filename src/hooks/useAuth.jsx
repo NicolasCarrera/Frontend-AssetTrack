@@ -13,7 +13,7 @@ export default function useAuth() {
     setUser(userData)
     setIsAuthenticated(true)
 
-    if (userData.roles.some(role => role === 'Usuario')) {
+    if (userData.roles.name === 'Usuario') {
       try {
         const customer = await getCustomerByUserId(userData.id)
         setCompany(customer)

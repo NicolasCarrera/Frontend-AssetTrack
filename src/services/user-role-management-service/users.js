@@ -2,16 +2,18 @@ import axios from 'axios'
 import { removeCircularReferences } from '../../utils/fix'
 import { defaultUserData } from '../../utils/objects/user'
 
-const API_ADDRESS = import.meta.env.VITE_JSON_SERVER
+const API_ADDRESS = `${import.meta.env.VITE_API_ADDRESS}/api/v1/users`
 
 export const loginUser = async (identification, password) => {
   try {
-    const response = await axios.get(`${API_ADDRESS}/users`)
-    const users = response.data
-    const user = users.find(u => (u.email === identification || u.document.value === identification) && u.password === password)
-    if (user) {
-      const token = btoa(JSON.stringify({ ...user, password: undefined }))
-      return token
+    const response = await axios.post(`${API_ADDRESS}/login`, {
+      identification,
+      password
+    })
+
+    const tokenUser = response.data
+    if (tokenUser) {
+      return tokenUser
     } else {
       throw new Error('Credenciales inválidas')
     }
@@ -22,30 +24,30 @@ export const loginUser = async (identification, password) => {
 }
 
 export const createUser = async (userData) => {
-  const cleanedData = removeCircularReferences(userData)
-  const response = await axios.post(`${API_ADDRESS}/users`, cleanedData)
+  console.log("Create User", userData);
+  const response = await axios.post(`${API_ADDRESS}/`, userData)
   return response.data
 }
 
 export const updateUser = async (id, userData) => {
   const cleanedData = removeCircularReferences(userData)
-  const response = await axios.put(`${API_ADDRESS}/users/${id}`, cleanedData)
+  const response = await axios.put(`${API_ADDRESS}/${id}`, cleanedData)
   return response.data
 }
 
 export const getAllUsers = async (page, size) => {
-  const response = await axios.get(`${API_ADDRESS}/users?_page=${page}&_limit=${size}`)
-  return response.data
+  const response = await axios.get(`${API_ADDRESS}/?page=${page || 0}&size=${size || 10}`)
+  return response.data.content
 }
 
 export const deleteUsers = async (id) => {
-  const response = await axios.delete(`${API_ADDRESS}/users/${id}`)
+  const response = await axios.delete(`${API_ADDRESS}/${id}`)
   return response.data
 }
 
 export const getUserById = async (id) => {
   try {
-    const response = await axios.get(`${API_ADDRESS}/users/${id}`)
+    const response = await axios.get(`${API_ADDRESS}/${id}`)
     return response.data
   } catch (error) {
     console.error(error);
@@ -54,14 +56,14 @@ export const getUserById = async (id) => {
 }
 
 export const getUserByRole = async (role) => {
-  const response = await axios.get(`${API_ADDRESS}/users?roles=${role}`)
+  const response = await axios.get(`${API_ADDRESS}/role/${role}`)
   return response.data
 }
 
 export const getUserByFilter = async (filter) => {
   try {
-    const response = await axios.get(`${API_ADDRESS}/users?q=${filter}`)
-    return response.data
+    const response = await axios.get(`${API_ADDRESS}/filter?filter=${filter}`)
+    return response.data.content
   } catch (error) {
     console.error(error)
     return []

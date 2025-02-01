@@ -14,14 +14,16 @@ export const getPreventiveReportByReporId = async (reportId) => {
 }
 
 export const cleatePreventiveReport = async (reportData) => {
-  try {
-    const cleanedData = removeCircularReferences(reportData)
-    const response = await axios.post(`${API_ADDRESS}`, cleanedData)
-    return response.data
-  } catch (error) {
-    console.error(error)
-    return null
-  }
+  console.log("cleatePreventiveReport", reportData);
+
+  // try {
+  //   const cleanedData = removeCircularReferences(reportData)
+  //   const response = await axios.post(`${API_ADDRESS}`, cleanedData)
+  //   return response.data
+  // } catch (error) {
+  //   console.error(error)
+  //   return null
+  // }
 }
 
 export const updatePreventiveReport = async (id, reportData) => {

@@ -65,7 +65,7 @@ export default function ReportView() {
               <tbody>
                 <tr className="border">
                   <th className="border p-2 text-left">DIRECCIÓN:</th>
-                  <td className="border p-2">{dataBranch.address}</td>
+                  <td className="border p-2">{dataBranch.location}</td>
                 </tr>
                 <tr className="border">
                   <th className="border p-2 text-left">EMAIL:</th>
@@ -92,12 +92,12 @@ export default function ReportView() {
                   <td className="border p-2">{dataAsset.serial}</td>
                 </tr>
                 <tr className="border">
-                  <th className="border p-2 text-left">CATEGORÍA</th>
-                  <td className="border p-2">{dataAsset.category}</td>
-                </tr>
-                <tr className="border">
                   <th className="border p-2 text-left">MARCA</th>
                   <td className="border p-2">{dataAsset.brand}</td>
+                </tr>
+                <tr className="border">
+                  <th className="border p-2 text-left">MODELO</th>
+                  <td className="border p-2">{dataAsset.model}</td>
                 </tr>
               </tbody>
             </table>
@@ -105,9 +105,9 @@ export default function ReportView() {
 
           <div className="space-y-4 text-gray-600 leading-relaxed">
             {
-              dataReport.type === 'PREVENTIVO' ?
+              dataReport.type === 'PREVENTIVE' ?
                 <PreventiveMaintenanceReport report={dataReport} /> :
-                dataReport.type === 'CORRECTIVO' ?
+                dataReport.type === 'CORRECTIVE' ?
                   <CorrectiveMaintenanceReport report={dataReport} /> :
                   <p>¡ERROR!</p>
             }

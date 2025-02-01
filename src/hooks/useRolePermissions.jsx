@@ -12,7 +12,7 @@ export default function useRolePermissions() {
 
   const hasPermission = (permission) => {
     if (!user || !user.roles) return false
-    return user.roles.some(role => rolePermissions[role]?.includes(permission))
+    return rolePermissions[user.roles.name]?.includes(permission)
   }
 
   return { hasPermission }

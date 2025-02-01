@@ -19,8 +19,6 @@ import ModalForm from '../../components/common/ModalForm'
 import FormWorkOrder from './FormWorkOrder'
 import FormCorrectiveMaintenance from '../work-order-management/FormCorrectiveMaintenance'
 import FormPreventiveMaintenance from '../work-order-management/FormPreventiveMaintenance'
-import { cleatePreventiveReport } from '../../services/work-order-maintenance-service/preventiveReport'
-import { cleateCorrectiveReport } from '../../services/work-order-maintenance-service/correctiveReport'
 import { userState } from '../../state/userAtom'
 import { useRecoilValue } from 'recoil'
 import Alert from '../../components/common/Alert'
@@ -30,8 +28,8 @@ export default function ManageMaintenance() {
 
   const user = useRecoilValue(userState)
 
-  const isAdmin = user.roles.some(role => role === 'Gerente de Mantenimiento')
-  const isTechnical = user.roles.some(role => role === 'Técnico de Mantenimiento')
+  const isAdmin = user.roles.name === 'Gerente de Mantenimiento'
+  const isTechnical = user.roles.name === 'Técnico de Mantenimiento'
 
   const [dataCompany, setDataCompany] = useState(defaultCompanyData)
   const [dataBranch, setDataBranch] = useState(defaultBranchData)
@@ -77,7 +75,7 @@ export default function ManageMaintenance() {
     if (editingWorkOrder?.id) {
       const updatedWorkOrderData = await updateWorkOrder(editingWorkOrder.id, formData)
       if (dataAsset.id) {
-        if (!dataAsset.maintenance.next) {
+        if (!dataAsset.maintenance?.next) {
           const updatedDataAsset = await updateAsset(dataAsset.id, { ...dataAsset, maintenance: { ...dataAsset.maintenance, next: updatedWorkOrderData.date } })
           setDataAsset(updatedDataAsset)
         } else {
@@ -88,6 +86,8 @@ export default function ManageMaintenance() {
       setDataWorkOrders(dataWorkOrders.map(workOrder => workOrder.id === editingWorkOrder.id ? updatedWorkOrderData : workOrder))
       handleCloseOrderForm()
     } else {
+      formData.branchId = Number(branchId)
+      formData.companyId = Number(customerId)
       const newWorkOrderData = await cleateWorkOrder(formData)
       if (dataAsset.id) {
         if (!dataAsset.maintenance.next) {
@@ -107,20 +107,20 @@ export default function ManageMaintenance() {
     const workOrder = dataWorkOrders.find(wo => wo.id === item.id ? wo : null)
     setEditingWorkOrder(workOrder)
     if (isAdmin) {
-      if (workOrder.type === 'PREVENTIVO') {
+      if (workOrder.type === 'PREVENTIVE') {
         setEditingWorkOrder(workOrder)
         setIsOpenPreventiveReportForm(true)
-      } else if (workOrder.type === 'CORRECTIVO') {
+      } else if (workOrder.type === 'CORRECTIVE') {
         setEditingWorkOrder(workOrder)
         setIsOpenCorrectiveReportForm(true)
       }
     }
     if (isTechnical) {
       if (item.userId === user.id) {
-        if (workOrder.type === 'PREVENTIVO') {
+        if (workOrder.type === 'PREVENTIVE') {
           setEditingWorkOrder(workOrder)
           setIsOpenPreventiveReportForm(true)
-        } else if (workOrder.type === 'CORRECTIVO') {
+        } else if (workOrder.type === 'CORRECTIVE') {
           setEditingWorkOrder(workOrder)
           setIsOpenCorrectiveReportForm(true)
         }
@@ -134,36 +134,89 @@ export default function ManageMaintenance() {
     setIsOpenPreventiveReportForm(false)
     setIsOpenCorrectiveReportForm(false)
   }
-
-  const handleSubmitReport = async (workOrder) => {
-    const { type, date, userId, assetId } = workOrder
-    const report = {
-      ...defaultReportData,
-      type: type,
-      date: date,
-      userId: userId,
-      assetId: assetId
-    }
-    const newReport = await cleateReport(report)
-    return newReport
-  }
-
   const handleSubmitPreventiveReport = async (formData) => {
-    const newReport = await handleSubmitReport(editingWorkOrder)
-    await cleatePreventiveReport({ ...formData, reportId: newReport.id })
+    const report = {
+      type: editingWorkOrder.type,
+      date: formData.date,
+      observations: [
+        formData.observations
+      ],
+      recommendations: [
+        formData.recommendations
+      ],
+      userId: editingWorkOrder.userId,
+      assetId: editingWorkOrder.assetId,
+      branchId: editingWorkOrder.branchId,
+      companyId: editingWorkOrder.companyId,
+      maintenanceActivities: [
+        {
+          name: "Partes inspeccionadas",
+          tasks: [
+            formData.inspectedParts
+          ]
+        },
+        {
+          name: "Partes remplazadas",
+          tasks: [
+            formData.replacedParts
+          ]
+        },
+      ],
+      preventiveMaintenance: {
+        frequency: formData.frequency
+      },
+      correctiveMaintenance: null
+    }
+    await cleateReport(report)
     await handleDeleteWorkOrder(editingWorkOrder.id)
-    setDataWorkOrders(...dataWorkOrders)
-    const asset = await getAssetById(editingWorkOrder.assetId)
-    await updateAsset(editingWorkOrder.assetId, { ...asset, maintenance: { ...asset.maintenance, last: newReport.date } })
     handleCloseReportForm()
   }
 
   const handleSubmitCorrectiveReport = async (formData) => {
-    const newReport = await handleSubmitReport(editingWorkOrder)
-    await cleateCorrectiveReport({ ...formData, reportId: newReport.id })
+    const report = {
+      type: editingWorkOrder.type,
+      date: formData.date,
+      observations: [
+        formData.observations
+      ],
+      recommendations: [
+        formData.recommendations
+      ],
+      userId: editingWorkOrder.userId,
+      assetId: editingWorkOrder.assetId,
+      branchId: editingWorkOrder.branchId,
+      companyId: editingWorkOrder.companyId,
+      maintenanceActivities: [
+        {
+          name: "Partes remplazadas",
+          tasks: [
+            formData.replacedParts
+          ]
+        },
+      ],
+      preventiveMaintenance: null,
+      correctiveMaintenance: {
+        issueDescription: formData.problemDescription,
+        failureCause: formData.rootCause,
+        postMaintenanceStatus: formData.postMaintenanceStatus,
+        diagnosticActions: [
+          {
+            action: "Análisis del problema",
+            descriptions: [
+              formData.problemAnalysis
+            ]
+          },
+          {
+            action: "Partes dañadas",
+            descriptions: [
+              formData.damagedParts
+            ]
+          }
+        ]
+      }
+    }
+    await cleateReport(report)
     await handleDeleteWorkOrder(editingWorkOrder.id)
-    const asset = await getAssetById(editingWorkOrder.assetId)
-    await updateAsset(editingWorkOrder.assetId, { ...asset, maintenance: { ...asset.maintenance, last: newReport.date } })
     handleCloseReportForm()
   }
 
@@ -211,7 +264,7 @@ export default function ManageMaintenance() {
             </tr>
             <tr>
               <th className='pb-2'>Dirección:</th>
-              <td className='pl-6 pb-2'>{dataBranch.address}</td>
+              <td className='pl-6 pb-2'>{dataBranch.location}</td>
             </tr>
             <tr>
               <th className='pb-2'>Teléfono:</th>
@@ -225,7 +278,7 @@ export default function ManageMaintenance() {
         </table>
         <Button
           icon={<PlusCircle />}
-          onClick={() => handleOpenOrderForm({ ...defaultWorkOrderData, assetId: assetId, status: 'Pendiente' })}
+          onClick={() => handleOpenOrderForm({ ...defaultWorkOrderData, assetId: Number(assetId), status: 'Pendiente' })}
         >
           Programar mantenimiento
         </Button>

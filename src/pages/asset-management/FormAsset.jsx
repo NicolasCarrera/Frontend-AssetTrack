@@ -54,18 +54,7 @@ export default function FormAsset({ onSubmit, initialData = null }) {
           />
         </label>
         <label className='block'>
-          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Categoría *</span>
-          <input
-            className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
-            type='text'
-            value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            readOnly={!isEditable}
-            required
-          />
-        </label>
-        <label className='block'>
-          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Marca o modelo *</span>
+          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Marca*</span>
           <input
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
             type='text'
@@ -76,12 +65,23 @@ export default function FormAsset({ onSubmit, initialData = null }) {
           />
         </label>
         <label className='block'>
-          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Tipo *</span>
+          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Modelo *</span>
           <input
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
             type='text'
-            value={formData.type}
-            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+            value={formData.model}
+            onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+            readOnly={!isEditable}
+            required
+          />
+        </label>
+        <label className='block'>
+          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Localización *</span>
+          <input
+            className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
+            type='text'
+            value={formData.location}
+            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
             readOnly={!isEditable}
             required
           />
@@ -96,6 +96,20 @@ export default function FormAsset({ onSubmit, initialData = null }) {
             readOnly={!isEditable}
             required
           />
+        </label>
+        <label className='block'>
+          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Estado</span>
+          <select
+            className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            readOnly={!isEditable}
+            required
+          >
+            <option value=''>Seleccione el estado</option>
+            <option value='ACTIVE'>Activo</option>
+            <option value='INACTIVE'>Inactivo</option>
+          </select>
         </label>
         <label className='block col-span-1 md:col-span-2'>
           <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Descripción</span>

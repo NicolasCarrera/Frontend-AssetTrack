@@ -5,5 +5,8 @@ export const defaultWorkOrderData = {
   status: '',
   tasks: [],
   userId: null,
-  assetId: null
+  assetId: null,
+  branchId: null,
+  companyId: null,
+  issueDescription: null,
 }

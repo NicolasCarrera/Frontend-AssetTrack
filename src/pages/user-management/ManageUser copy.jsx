@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import PlusCircle from '../../assets/icons/PlusCircle'
 import Pencil from '../../assets/icons/Pencil'
+import Trash from '../../assets/icons/Trash'
 import Button from '../../components/common/Button'
+import Chip from '../../components/common/Chip'
+import Search from '../../components/common/Search'
 import { useEffect } from 'react'
-import { createUser, getAllUsers, getUserById, updateUser } from '../../services/user-role-management-service/users'
+import ChevronLeft from '../../assets/icons/ChevronLeft'
+import ChevronRight from '../../assets/icons/ChevronRight'
+import { createUser, deleteUsers, getAllUsers, getUserByFilter, getUserById, updateUser } from '../../services/user-role-management-service/users'
 import FormUser from './FormUser'
 import Alert from '../../components/common/Alert'
 import ModalForm from '../../components/common/ModalForm'
@@ -16,13 +21,32 @@ export default function ManageUser() {
   const [isOpenForm, setIsOpenForm] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
 
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const [page, setPage] = useState(0)
+  const [size, setSize] = useState(5)
+
+  const [totalPages, setTotalPages] = useState(0)
+
+  const [totalElements, setTotalElements] = useState(0)
+
   useEffect(() => {
     const fetchDataUsers = async () => {
       const newDataUsers = await getAllUsers()
-      setDataUsers(newDataUsers)
+      setDataUsers(
+        newDataUsers.map(user => refactorUserData(user))
+      )
     }
     fetchDataUsers()
   }, [])
+
+  useEffect(() => {
+    const fetchDataUsers = async () => {
+      const newDataUsers = await getUserByFilter(searchTerm)
+      setDataUsers(newDataUsers)
+    }
+    fetchDataUsers()
+  }, [searchTerm])
 
   const handleOpenForm = (item = null) => {
     setEditingUser(item)
@@ -37,20 +61,34 @@ export default function ManageUser() {
   const handleSubmitUser = async (formData) => {
     if (editingUser?.id) {
       const updatedUserData = await updateUser(editingUser.id, formData)
-      setDataUsers(dataUsers.map(user => user.id === editingUser.id ? updatedUserData : user))
+      setDataUsers(dataUsers.map(user => user.id === editingUser.id ? refactorUserData(updatedUserData) : user))
       handleCloseForm()
       setAlertModal({ title: 'Usuario actualizado', message: ['Los datos del usuario se han actualizado'] })
     } else {
       const newUserData = await createUser(formData)
-      setDataUsers([...dataUsers, newUserData])
+      setDataUsers([...dataUsers, refactorUserData(newUserData)])
       handleCloseForm()
       setAlertModal({ title: 'Usuario ingresado', message: ['El usuario a sido registrado exitosamente'] })
     }
   }
 
+  const handleDeleteUser = async (id) => {
+    await deleteUsers(id)
+    setDataUsers(dataUsers.filter(user => user.id != id))
+    setAlertModal({ title: 'Esuario eliminado ', message: ['Los datos del usuario han sido eliminados'] })
+  }
+
+  const refactorUserData = (user) => {
+    return {
+      ...user,
+      status: <Chip variant={user.status === 'ACTIVE' ? 'green' : 'grey'}>{user.status}</Chip>,
+      roles: user.roles ? user.roles.name : ''
+    }
+  }
+
   const colums = [
-    { title: 'Nombre del usuario', value: 'firstName' },
-    { title: 'Rol del usuario', value: 'roles.name' },
+    { title: 'Nombre', value: 'firstName' },
+    { title: 'Rol', value: 'roles' },
     { title: 'Estado', value: 'status' }
   ]
 
@@ -61,6 +99,7 @@ export default function ManageUser() {
       </h1>
       <Alert title={alertModal.title} message={alertModal.message} />
       <div className='flex flex-col-reverse gap-4 md:flex-row md:justify-between mb-5'>
+        <Search onSearch={setSearchTerm} />
         <Button
           icon={<PlusCircle />}
           onClick={handleOpenForm}
@@ -75,7 +114,7 @@ export default function ManageUser() {
             {
               colums.map(column => (
                 <th
-                  className='py-4'
+                  className='py-2'
                   key={column.value}
                 >
                   {column.title}
@@ -91,17 +130,17 @@ export default function ManageUser() {
           {
             dataUsers.map(item => (
               <tr
-                className='border-b border-gray-400 hover:bg-gray-100'
+                className='border-b border-gray-400'
                 key={item.id}
               >
                 {
                   colums.map(column => (
                     <td
                       key={column.value}
-                      className='px-6 py-4'
+                      className='py-2'
                     >
                       {
-                        column.value.split('.').reduce((acc, part) => acc && acc[part], item) || ''
+                        item[column.value]
                       }
                     </td>
                   ))
@@ -114,13 +153,49 @@ export default function ManageUser() {
                   >
                     <Pencil />
                   </button>
+                  <button onClick={() => handleDeleteUser(item.id)}>
+                    <Trash />
+                  </button>
                 </td>
               </tr>
             ))
           }
         </tbody>
       </table>
-      <div className='bg-[#0F0E17] text-[#FFFFFE] h-10'>
+      <div className='flex gap-10 justify-end py-2 bg-[#0F0E17] text-[#FFFFFE]'>
+        <label className='flex gap-4'>
+          <span className='hidden md:block'>
+            Resultado por página
+          </span>
+          <div className='px-4 rounded-full bg-[#FFFFFE]'>
+            <select
+              className='bg-[#FFFFFE] text-[#0F0E17]'
+              value={size}
+              onChange={e => setSize(e.target.value)}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+            </select>
+          </div>
+        </label>
+        <span>
+          {page * size + 1} - {page * size + size < totalElements ? page * size + size : totalElements} de {totalElements}
+        </span>
+        <div className='flex gap-5 mr-10'>
+          <button
+            onClick={() => setPage(page - 1)}
+            disabled={page <= 0}
+          >
+            <ChevronLeft />
+          </button>
+          <button
+            onClick={() => setPage(page + 1)}
+            disabled={page >= totalPages || size >= totalElements}
+          >
+            <ChevronRight />
+          </button>
+        </div>
       </div>
       <ModalForm isOpen={isOpenForm} onClose={handleCloseForm} >
         <FormUser onSubmit={handleSubmitUser} initialData={editingUser} />

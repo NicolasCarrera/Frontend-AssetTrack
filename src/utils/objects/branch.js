@@ -1,9 +1,10 @@
 export const defaultBranchData = {
   id: null,
   name: '',
-  address: '',
+  location: '',
   phone: '',
   email: '',
+  status: '',
   assets: 0,
   companyId: null
 }

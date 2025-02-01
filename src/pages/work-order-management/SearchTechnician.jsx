@@ -33,9 +33,8 @@ export default function SearchTechnician({ isOpen, onClose, onClick }) {
 
   return (
     <div className='w-full h-screen absolute top-0 left-0 flex items-center justify-center bg-black/50'>
-      <div className='w-fit h-5/6 relative box-border rounded-md shadow-lg bg-[#0F0E17] text-[#FFFFFE] px-10 pt-10 pb-20'>
-        <div className='flex flex-col-reverse gap-4 md:flex-row md:justify-between mb-5'>
-          <Search />
+      <div className='w-[500px] h-5/6 relative box-border rounded-md shadow-lg bg-[#0F0E17] text-[#FFFFFE] px-10 pt-10 pb-20'>
+        <div className='flex flex-row-reverse mb-5'>
           <button>
             <button onClick={onClose}>
               <Close />
@@ -46,7 +45,7 @@ export default function SearchTechnician({ isOpen, onClose, onClick }) {
           {
             dataTechnicians.map(item => (
               <li
-                className={`flex items-center justify-between py-2 hover:text-[#FF8906] ${technical.id === item.id ? 'text-[#FF8906]' : 'text-[#FFFFFE]'}`}
+                className={`flex items-center justify-between gap-4 py-2 hover:text-[#FF8906] ${technical.id === item.id ? 'text-[#FF8906]' : 'text-[#FFFFFE]'}`}
                 key={item.id}
                 onClick={() => handleTechnical(item)}
               >

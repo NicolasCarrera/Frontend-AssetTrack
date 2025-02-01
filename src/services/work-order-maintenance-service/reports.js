@@ -2,12 +2,12 @@ import axios from 'axios'
 import { removeCircularReferences } from '../../utils/fix'
 import { defaultReportData } from '../../utils/objects/report'
 
-const API_ADDRESS = `${import.meta.env.VITE_JSON_SERVER}/reports`
+const API_ADDRESS = `${import.meta.env.VITE_API_ADDRESS}/api/v1/maintenance`
 
 export const getReportsByAssetId = async (assetId) => {
   try {
-    const response = await axios.get(`${API_ADDRESS}?_sort=date&_order=desc&assetId=${assetId}`)
-    return response.data
+    const response = await axios.get(`${API_ADDRESS}/reports/assets/${assetId}`)
+    return response.data.content
   } catch (error) {
     console.error(error)
     return []
@@ -16,7 +16,7 @@ export const getReportsByAssetId = async (assetId) => {
 
 export const getReportsById = async (id) => {
   try {
-    const response = await axios.get(`${API_ADDRESS}/${id}`)
+    const response = await axios.get(`${API_ADDRESS}/reports/${id}`)
     return response.data
   } catch (error) {
     console.error(error)
@@ -26,8 +26,8 @@ export const getReportsById = async (id) => {
 
 export const cleateReport = async (reportData) => {
   try {
-    const cleanedData = removeCircularReferences(reportData)
-    const response = await axios.post(`${API_ADDRESS}`, cleanedData)
+    //const cleanedData = removeCircularReferences(reportData)
+    const response = await axios.post(`${API_ADDRESS}/reports`, reportData)
     return response.data
   } catch (error) {
     console.error(error)
@@ -38,7 +38,7 @@ export const cleateReport = async (reportData) => {
 export const updateReport = async (id, reportData) => {
   try {
     const cleanedData = removeCircularReferences(reportData)
-    const response = await axios.put(`${API_ADDRESS}/${id}`, cleanedData)
+    const response = await axios.put(`${API_ADDRESS}/reports/${id}`, cleanedData)
     return response.data
   } catch (error) {
     console.error(error)

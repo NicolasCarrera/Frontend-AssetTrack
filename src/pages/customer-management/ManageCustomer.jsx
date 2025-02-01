@@ -12,7 +12,7 @@ import FormCustomer from './FormCustomer'
 import FormBranch from './FormBranch'
 import ModalForm from '../../components/common/ModalForm'
 import { defaultBranchData } from '../../utils/objects/branch'
-import { createBranch, deleteBranch, getBranchesByCompanyId, updateBranch } from '../../services/customer-branches-service/branch'
+import { createBranch, getBranchesByCompanyId, updateBranch } from '../../services/customer-branches-service/branch'
 import { defaultCompanyData } from '../../utils/objects/company'
 import { useRecoilValue } from 'recoil'
 import { userState } from '../../state/userAtom'
@@ -22,7 +22,7 @@ export default function ManageCustomer() {
 
   const user = useRecoilValue(userState)
 
-  const isAdmin = user.roles.some(role => role === 'Gerente de Mantenimiento')
+  const isAdmin = user.roles.name === 'Gerente de Mantenimiento'
 
   const [dataCompanies, setDataCompanies] = useState([])
   const [dataBranches, setDataBranches] = useState([])
@@ -100,11 +100,6 @@ export default function ManageCustomer() {
     setDataCompanies(dataCompanies.filter(company => company.id !== id))
   }
 
-  const handleDeleteBranch = async (id) => {
-    await deleteBranch(id)
-    setDataBranches(dataBranches.filter(branch => branch.id !== id))
-  }
-
   const [selectCompany, setSelectCompany] = useState(defaultCompanyData)
 
   const handleSelectCompany = async (item) => {
@@ -149,28 +144,9 @@ export default function ManageCustomer() {
     </div>
   ]
 
-  const getBranchEditingOptions = (branch) => [
-    <button
-      className='flex gap-4'
-      key='edit'
-      onClick={() => handleOpenBranchForm(branch)}
-    >
-      <Pencil />
-      <span>Ver o editar sucursal</span>
-    </button>,
-    <div
-      className='flex gap-4'
-      key='delete'
-      onClick={() => handleDeleteBranch(branch.id)}
-    >
-      <Trash />
-      <span>Borrar sucursal</span>
-    </div>
-  ]
-
   const colums = [
     { title: 'Sucursal', value: 'name' },
-    { title: 'Dirección', value: 'address' },
+    { title: 'Dirección', value: 'location' },
     { title: 'Activos registrados', value: 'assets' },
   ]
 
@@ -290,14 +266,6 @@ export default function ManageCustomer() {
                           </td>
                         ))
                       }
-                      <td key='actions'>
-                        {
-                          isAdmin &&
-                          <Dropdown options={getBranchEditingOptions(item)}>
-                            <EllipsisVertical />
-                          </Dropdown>
-                        }
-                      </td>
                     </tr>
                   ))
                 }

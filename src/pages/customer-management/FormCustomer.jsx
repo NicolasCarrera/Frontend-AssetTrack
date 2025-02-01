@@ -1,22 +1,30 @@
 import { useEffect, useState } from 'react'
 import { defaultCompanyData } from '../../utils/objects/company';
+import { getUserByRole } from '../../services/user-role-management-service/users';
 
 export default function FormCustomer({ onSubmit, initialData = null }) {
   const isEditable = true
 
-  const [formData, setFormData] = useState(defaultCompanyData);
+  const [formData, setFormData] = useState(defaultCompanyData)
+  const [users, setUsers] = useState([])
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData(initialData)
     } else {
-      setFormData(defaultCompanyData);
+      setFormData(defaultCompanyData)
     }
+    getAllUsers()
   }, [initialData]);
 
   const handleSubmit = (e) => {
     e.preventDefault()
     onSubmit(formData)
+  }
+
+  const getAllUsers = async () => {
+    const response = await getUserByRole('Usuario')
+    setUsers(response)
   }
 
   return (
@@ -43,51 +51,39 @@ export default function FormCustomer({ onSubmit, initialData = null }) {
             required
           />
         </label>
+
         <label className='block'>
-          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Sector industrial</span>
-          <input
+          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Gerente *</span>
+          <select
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
-            type='text'
-            value={formData.industry}
-            onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-            readOnly={!isEditable}
-          />
-        </label>
-      </fieldset>
-      <fieldset className='grid grid-cols-1 md:grid-cols-2 gap-6 my-4'>
-        <legend className='font-bold mb-2'>Información de la sede o casa matriz</legend>
-        <label className='block'>
-          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Dirección *</span>
-          <input
-            className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
-            type='text'
-            value={formData.address}
-            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            value={formData.userId}
+            onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
             readOnly={!isEditable}
             required
-          />
+          >
+            <option value={null}>Usuario encargado</option>
+            {
+              users.length > 0 &&
+              users.map(user => (
+                <option key={user.id} value={user.id}>{user.firstName}</option>
+              ))
+            }
+          </select>
         </label>
+
         <label className='block'>
-          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Email *</span>
-          <input
+          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Estado</span>
+          <select
             className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
-            type='email'
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
             readOnly={!isEditable}
             required
-          />
-        </label>
-        <label className='block'>
-          <span className='block mb-2 text-sm font-medium text-[#FFFFFE]'>Teléfono *</span>
-          <input
-            className='block w-full px-4 py-2 rounded-md text-[#0F0E17]'
-            type='text'
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            readOnly={!isEditable}
-            required
-          />
+          >
+            <option value=''>Seleccione el estado</option>
+            <option value='ACTIVE'>Activo</option>
+            <option value='INACTIVE'>Inactivo</option>
+          </select>
         </label>
       </fieldset>
       <button
